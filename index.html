@@ -2,132 +2,194 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <title>KPIs Serenazgo - Interactivo (Vehículos + Excel)</title>
+  <title>KPIs Serenazgo - Interactivo (Vehículos: 4 filtros)</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <!-- Tipografías -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=Poppins:wght@500;700&display=swap" rel="stylesheet">
+  <!-- Chart.js v4 -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
   <style>
     :root{
-      --gap:16px; --canvas-h:520px;
-      --card-bg:#fff; --card-br:14px; --shadow:0 2px 8px rgba(0,0,0,.06);
-      --border:#e5e9f0; --muted:#667085; --header:#0f172a; --accent:#1f7aec;
+      --bg: #f5f7fb; --bg-soft: #eef2f8; --card: #ffffff; --text: #0f172a;
+      --muted: #64748b; --border: #e5e9f0; --shadow: 0 6px 24px rgba(15, 23, 42, 0.08);
+      --radius: 16px; --primary: #2563eb; --primary-600:#1d4ed8; --primary-50:#eff6ff;
+      --grid: #e6eaf2; --gap: 18px; --canvas-h: 540px;
+    }
+    @media (prefers-color-scheme: dark){
+      :root{
+        --bg:#0b1220; --bg-soft:#0e1627; --card:#0f182a; --text:#e6edf6;
+        --muted:#98a2b3; --border:#1f2a3c; --shadow:0 10px 30px rgba(0,0,0,.5);
+        --primary:#5aa6ff; --primary-600:#4794ef; --primary-50:#0e274f; --grid:#263349;
+      }
     }
     @media (max-width:1024px){ :root{ --canvas-h:420px; } }
     @media (max-width:640px){ :root{ --canvas-h:320px; } }
 
     *{ box-sizing:border-box; }
-    body{ font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,Helvetica,sans-serif; margin:20px; background:#f6f7f9; color:#222; }
-    .container{ width:100%; max-width:1200px; margin:0 auto; }
-    h1{ margin:0 0 6px; font-size:clamp(20px,2.4vw,30px); color:var(--header); }
-    p.hint{ margin:0 0 16px; color:#555; font-size:clamp(12px,1.6vw,14px); }
+    html, body{ height:100%; }
+    body{ margin:0; font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,Helvetica,sans-serif; background:var(--bg); color:var(--text); line-height:1.45; }
 
-    /* Filtros */
-    .filters{ display:grid; grid-template-columns:1fr 1fr; gap:var(--gap); margin-bottom:16px; }
-    @media (min-width:768px){ .filters{ grid-template-columns:repeat(6,minmax(120px,1fr)); } }
-    .filters label{ display:block; font-size:12px; color:#444; margin-bottom:6px; }
-    .filters input[type="date"], .filters input[type="text"]{
-      width:100%; padding:10px; border:1px solid #d7dbe3; border-radius:10px; background:#fff; font-size:14px;
+    .hero{
+      padding: 34px 16px 28px;
+      background: radial-gradient(1200px 400px at 10% 0%, var(--primary-50), transparent 60%),
+                  linear-gradient(180deg, rgba(37,99,235,0.06), transparent 40%);
+      border-bottom: 1px solid var(--border);
     }
-    .filters button{
-      padding:12px 14px; border:none; border-radius:12px; cursor:pointer; background:var(--accent); color:#fff; font-weight:600; box-shadow:var(--shadow);
+    .container{ width:100%; max-width:1200px; margin:0 auto; padding:0 16px; }
+    .title{ font-family:Poppins,Inter,sans-serif; font-weight:700; letter-spacing:-0.3px; font-size:clamp(22px,2.6vw,32px); margin:0 0 6px; }
+    .subtitle{ margin:0; color:var(--muted); font-size:clamp(12px,1.6vw,14px); }
+
+    .card{ background:var(--card); border:1px solid var(--border); border-radius:var(--radius); box-shadow:var(--shadow); }
+
+    .filters{ display:grid; grid-template-columns:1fr 1fr; gap:var(--gap); margin-top:-24px; }
+    @media (min-width:900px){ .filters{ grid-template-columns:repeat(6, minmax(140px,1fr)); } }
+    .field{ display:flex; flex-direction:column; }
+    .label{ font-size:12px; color:var(--muted); margin:10px 0 6px 2px; font-weight:600; }
+    .input, .search{
+      width:100%; padding:12px; background:#fff0; border:1px solid var(--border); border-radius:12px; color:var(--text); outline:none;
     }
-
-    /* Checklists */
-    .box{
-      grid-column:1 / -1; background:var(--card-bg); border-radius:var(--card-br); padding:12px;
-      border:1px solid var(--border); box-shadow:var(--shadow);
+    .input:focus, .search:focus{ border-color:var(--primary); box-shadow:0 0 0 3px color-mix(in oklab, var(--primary) 20%, transparent); }
+    .btn{
+      display:inline-flex; align-items:center; justify-content:center; gap:8px; padding:12px 14px;
+      border:none; border-radius:12px; background:var(--primary); color:#fff; font-weight:700; cursor:pointer;
+      transition: transform .05s ease, box-shadow .2s ease, background .2s ease;
+      box-shadow: 0 8px 18px color-mix(in oklab, var(--primary) 20%, transparent);
     }
-    .actions{ display:flex; gap:12px; align-items:center; margin-bottom:8px; flex-wrap:wrap; color:var(--muted); }
-    .grid-checks{ display:grid; gap:8px; grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); }
-    .item{ font-size:14px; }
+    .btn:hover{ background:var(--primary-600); }
+    .btn:active{ transform: translateY(1px); }
 
-    /* KPIs */
-    .kpi-cards{ display:grid; grid-template-columns:1fr; gap:12px; margin:12px 0 16px; }
-    @media (min-width:768px){ .kpi-cards{ grid-template-columns:repeat(3,minmax(160px,1fr)); } }
-    .kpi-card{ background:var(--card-bg); border-radius:var(--card-br); padding:clamp(12px,2vw,16px); box-shadow:var(--shadow); border:1px solid var(--border); }
-    .kpi-card h3{ margin:0 0 6px; font-size:clamp(12px,1.8vw,14px); color:#475569; font-weight:600; }
-    .kpi-card .value{ font-size:clamp(18px,3.2vw,26px); font-weight:800; color:#0f172a; }
+    .box{ grid-column:1 / -1; padding:14px; }
+    .box-header{ display:flex; align-items:center; gap:12px; flex-wrap:wrap; margin-bottom:10px; }
+    .soft{ color:var(--muted); font-size:12px; }
 
-    /* Gráficos */
-    .grid{ display:grid; grid-template-columns:1fr; gap:16px; }
-    @media (min-width:1000px){ .grid{ grid-template-columns:1fr 1fr; } .grid .chart-card.full{ grid-column:1 / -1; } }
-    .chart-card{
-      position:relative; background:var(--card-bg); border-radius:var(--card-br); box-shadow:var(--shadow);
-      height:var(--canvas-h); padding:12px; border:1px solid var(--border);
+    /* checks */
+    .checks{ display:grid; gap:10px; grid-template-columns:repeat(auto-fill, minmax(220px,1fr)); }
+    .check{ display:inline-flex; align-items:center; gap:10px; padding:10px 12px; border:1px solid var(--border); border-radius:12px;
+            background: color-mix(in oklab, var(--bg-soft) 70%, transparent); transition: border-color .2s ease, background .2s ease; }
+    .check:hover{ border-color:var(--primary); background: color-mix(in oklab, var(--primary-50) 25%, transparent); }
+    .check input[type="checkbox"]{
+      appearance:none; width:18px; height:18px; border:2px solid var(--border); border-radius:6px; display:grid; place-content:center; background:#fff0; cursor:pointer; transition:border-color .2s, background .2s;
     }
-    .chart-card canvas{ display:block; width:100% !important; height:100% !important; }
+    .check input[type="checkbox"]::before{ content:""; width:10px; height:10px; transform:scale(0); transition:transform .12s ease-in-out; background:var(--primary); border-radius:2px; }
+    .check input[type="checkbox"]:checked{ border-color:var(--primary); background: color-mix(in oklab, var(--primary) 20%, transparent); }
+    .check input[type="checkbox"]:checked::before{ transform: scale(1); }
 
-    /* Tablas */
-    .table-wrap{ background:var(--card-bg); border:1px solid var(--border); border-radius:var(--card-br); box-shadow:var(--shadow); overflow:auto; }
+    .kpis{ display:grid; gap:var(--gap); margin:18px 0 16px; grid-template-columns:1fr; }
+    @media (min-width:850px){ .kpis{ grid-template-columns:repeat(3, minmax(220px,1fr)); } }
+    .kpi{ padding: clamp(14px,2vw,18px); }
+    .kpi h3{ margin:0 0 8px; font-weight:600; color:var(--muted); font-size:clamp(12px,1.7vw,14px); }
+    .kpi .value{ font-weight:800; letter-spacing:-0.3px; font-size:clamp(20px,3.2vw,28px); }
+
+    .charts{ display:grid; gap:var(--gap); grid-template-columns:1fr; margin-bottom:8px; }
+    @media (min-width:1100px){ .charts{ grid-template-columns:1fr 1fr; } .full{ grid-column:1 / -1; } }
+    .chart{ height:var(--canvas-h); padding:12px; }
+    .chart canvas{ width:100% !important; height:100% !important; display:block; }
+
+    .section-title{ margin:18px 4px 10px; font-family:Poppins,Inter,sans-serif; font-weight:700; font-size:clamp(16px,2vw,20px); }
+    .table-wrap{ overflow:auto; }
     table{ width:100%; border-collapse:collapse; }
-    th,td{ padding:10px 12px; border-bottom:1px solid #eef1f6; text-align:left; font-size:clamp(12px,1.8vw,14px); white-space:nowrap; }
-    thead th{ position:sticky; top:0; background:#f3f6fb; z-index:1; }
-    tbody tr:nth-child(odd){ background:#fbfdff; }
+    thead th{
+      position:sticky; top:0; background: color-mix(in oklab, var(--bg-soft) 80%, var(--card) 20%);
+      border-bottom:1px solid var(--border); color:var(--muted); font-weight:700; text-transform:uppercase; letter-spacing:.02em; font-size:12px;
+    }
+    th,td{ padding:12px 14px; white-space:nowrap; border-bottom:1px solid var(--border); }
+    tbody tr:nth-child(odd){ background: color-mix(in oklab, var(--card) 90%, var(--bg-soft) 10%); }
+    tfoot td{ font-weight:700; background: color-mix(in oklab, var(--bg-soft) 70%, var(--card) 30%); }
 
-    .muted{ color:var(--muted); font-size:clamp(11px,1.6vw,13px); margin-top:6px; }
-    .section-title{ margin:18px 0 10px; color:#0f172a; }
-    .error-box{ background:#fff3f3; border:1px solid #ffd9d9; color:#a30000; padding:10px 12px; border-radius:10px; margin:10px 0; display:none; }
+    .muted{ color:var(--muted); font-size:12px; margin-top:8px; }
+    .error{ display:none; margin:14px 0; padding:12px; border-radius:12px; background:#fee2e2; border:1px solid #fecaca; color:#991b1b; }
   </style>
 </head>
 <body>
-  <div class="container">
-    <h1>KPIs Movilidad Serenazgo - Julio 2025</h1>
-    <p class="hint">Filtra por fecha, conductores y tipos de vehículo. Los KPIs y gráficos se recalculan en tiempo real.</p>
+  <header class="hero">
+    <div class="container">
+      <h1 class="title">KPIs Movilidad Serenazgo — Julio 2025</h1>
+      <p class="subtitle">Filtra por fecha, conductores y vehículos. Los KPIs y gráficos se recalculan en tiempo real.</p>
+    </div>
+  </header>
 
-    <div id="errorBox" class="error-box"></div>
+  <main class="container" style="margin-top:20px;">
+    <div id="errorBox" class="error"></div>
 
     <!-- FILTROS -->
-    <div class="filters">
-      <div><label for="startDate">Desde</label><input type="date" id="startDate" /></div>
-      <div><label for="endDate">Hasta</label><input type="date" id="endDate" /></div>
-      <div style="grid-column: span 2;"><label for="buscarConductor">Buscar conductor (opcional)</label><input type="text" id="buscarConductor" placeholder="Ej.: FREBER, RULY, DAVID..." /></div>
-      <div><label>&nbsp;</label><button id="btnFiltrar" type="button">Filtrar</button></div>
+    <section class="filters">
+      <div class="field">
+        <label class="label" for="startDate">Desde</label>
+        <input class="input" type="date" id="startDate" />
+      </div>
+      <div class="field">
+        <label class="label" for="endDate">Hasta</label>
+        <input class="input" type="date" id="endDate" />
+      </div>
+      <div class="field" style="grid-column:span 2;">
+        <label class="label" for="buscarConductor">Buscar conductor (opcional)</label>
+        <input class="search" type="text" id="buscarConductor" placeholder="Ej.: FREBER, RULY, DAVID..." />
+      </div>
+      <div class="field">
+        <label class="label">&nbsp;</label>
+        <button id="btnFiltrar" class="btn" type="button" title="Aplicar filtros">Aplicar filtros</button>
+      </div>
 
       <!-- Conductores -->
-      <div class="box">
-        <div class="actions">
-          <label><input type="checkbox" id="chkTodosConductores" checked /> Seleccionar todos (conductores)</label>
-          <span id="infoConductores" class="muted"></span>
+      <div class="box card">
+        <div class="box-header">
+          <label class="check">
+            <input type="checkbox" id="chkTodosConductores" checked />
+            <span><strong>Seleccionar todos</strong> — Conductores</span>
+          </label>
+          <span id="infoConductores" class="soft"></span>
         </div>
-        <div id="conductoresList" class="grid-checks"></div>
+        <div id="conductoresList" class="checks"></div>
       </div>
 
-      <!-- Tipos de vehículo -->
-      <div class="box">
-        <div class="actions">
-          <label><input type="checkbox" id="chkTodosTipos" checked /> Seleccionar todos (tipos de vehículo)</label>
-          <span id="infoTipos" class="muted"></span>
+      <!-- Vehículos: 4 casillas fijas -->
+      <div class="box card">
+        <div class="box-header">
+          <label class="check">
+            <input type="checkbox" id="chkTodosVehiculos" checked />
+            <span><strong>Seleccionar todos</strong> — Vehículos (4)</span>
+          </label>
+          <span id="infoVehiculos" class="soft"></span>
         </div>
-        <div id="tiposList" class="grid-checks"></div>
+        <div id="vehiculosList" class="checks"></div>
       </div>
-    </div>
+    </section>
 
     <!-- KPIs -->
-    <div class="kpi-cards">
-      <div class="kpi-card"><h3>Combustible total (todos los turnos)</h3><div id="kpiCombustibleTotal" class="value">0</div></div>
-      <div class="kpi-card"><h3>Recorrido total (todos los turnos)</h3><div id="kpiRecorridoTotal" class="value">0</div></div>
-      <div class="kpi-card"><h3>Registros filtrados</h3><div id="kpiRegistros" class="value">0</div></div>
-    </div>
+    <section class="kpis">
+      <article class="kpi card"><h3>Combustible total (todos los turnos)</h3><div id="kpiCombustibleTotal" class="value">0</div></article>
+      <article class="kpi card"><h3>Recorrido total (todos los turnos)</h3><div id="kpiRecorridoTotal" class="value">0</div></article>
+      <article class="kpi card"><h3>Registros filtrados</h3><div id="kpiRegistros" class="value">0</div></article>
+    </section>
 
     <!-- GRÁFICOS -->
-    <div class="grid">
-      <div class="chart-card full"><canvas id="combustibleChart"></canvas></div>
-      <div class="chart-card"><canvas id="kmPromedioChart"></canvas></div>
-      <div class="chart-card"><canvas id="recorridoTotalChart"></canvas></div>
-    </div>
+    <section class="charts">
+      <div class="chart card full"><canvas id="combustibleChart"></canvas></div>
+      <div class="chart card"><canvas id="kmPromedioChart"></canvas></div>
+      <div class="chart card"><canvas id="recorridoTotalChart"></canvas></div>
+    </section>
 
     <!-- TABLAS -->
     <h2 class="section-title">Tabla de KPIs (por turno)</h2>
-    <div id="kpiTableWrap" class="table-wrap"></div>
+    <div id="kpiTableWrap" class="table-wrap card"></div>
 
     <h2 class="section-title">Tabla completa (como en el Excel)</h2>
-    <div id="rawTableWrap" class="table-wrap"></div>
+    <div id="rawTableWrap" class="table-wrap card"></div>
 
-    <div class="muted" id="resume"></div>
-  </div>
+    <p class="muted" id="resume"></p>
+  </main>
 
   <script>
-    /* ========= DATA EMBEBIDA DESDE TU EXCEL ========= */
+    /* ====== DATA EMBEBIDA (desde tu Excel) ====== */
     const DATA = [{"Fecha":"2025-07-01","Turno":"DIA","Conductor":"ALVARO SUBILETA","Unidad_Movil":"EUG-707","KM_Inicial":151795.0,"KM_Final":151837.0,"Recorrido":42.0,"Combustible":null,"Cambio_Aceite":null,"Mantenimiento":null,"Ocurrencias":null},{"Fecha":"2025-07-01","Turno":"DIA","Conductor":"DAVID CACERES","Unidad_Movil":"EX - 7680","KM_Inicial":7576.0,"KM_Final":7897.0,"Recorrido":321.0,"Combustible":null,"Cambio_Aceite":null,"Mantenimiento":null,"Ocurrencias":null},{"Fecha":"2025-07-01","Turno":"TARDE","Conductor":"FREBER MAMANI","Unidad_Movil":"EUG-707","KM_Inicial":151837.0,"KM_Final":151901.0,"Recorrido":64.0,"Combustible":null,"Cambio_Aceite":null,"Mantenimiento":null,"Ocurrencias":null},{"Fecha":"2025-07-01","Turno":"NOCHE","Conductor":"RULY PAREDES","Unidad_Movil":"EUG-707","KM_Inicial":151901.0,"KM_Final":151944.0,"Recorrido":43.0,"Combustible":null,"Cambio_Aceite":null,"Mantenimiento":null,"Ocurrencias":null},{"Fecha":"2025-07-02","Turno":"DIA","Conductor":"GONZALO RAMIREZ","Unidad_Movil":"EUG-707","KM_Inicial":151944.0,"KM_Final":151995.0,"Recorrido":51.0,"Combustible":null,"Cambio_Aceite":null,"Mantenimiento":null,"Ocurrencias":null},{"Fecha":"2025-07-02","Turno":"DIA","Conductor":"DAVID CACERES","Unidad_Movil":"EX - 7680","KM_Inicial":7897.0,"KM_Final":8213.0,"Recorrido":null,"Combustible":null,"Cambio_Aceite":null,"Mantenimiento":null,"Ocurrencias":null},{"Fecha":"2025-07-02","Turno":"TARDE","Conductor":"GONZALO RAMIREZ","Unidad_Movil":"EUG-707","KM_Inicial":151995.0,"KM_Final":152048.0,"Recorrido":53.0,"Combustible":null,"Cambio_Aceite":null,"Mantenimiento":null,"Ocurrencias":null},{"Fecha":"2025-07-02","Turno":"NOCHE","Conductor":"RULY PAREDES","Unidad_Movil":"EUG-707","KM_Inicial":152048.0,"KM_Final":152095.0,"Recorrido":47.0,"Combustible":null,"Cambio_Aceite":null,"Mantenimiento":null,"Ocurrencias":null},{"Fecha":"2025-07-03","Turno":"DIA","Conductor":"ALVARO SUBILETA","Unidad_Movil":"EUG-707","KM_Inicial":152095.0,"KM_Final":152156.0,"Recorrido":61.0,"Combustible":null,"Cambio_Aceite":null,"Mantenimiento":null,"Ocurrencias":null},{"Fecha":"2025-07-03","Turno":"TARDE","Conductor":"FREBER MAMANI","Unidad_Movil":"EUG-707","KM_Inicial":152156.0,"KM_Final":152219.0,"Recorrido":63.0,"Combustible":null,"Cambio_Aceite":null,"Mantenimiento":null,"Ocurrencias":null},{"Fecha":"2025-07-03","Turno":"NOCHE","Conductor":"RULY PAREDES","Unidad_Movil":"EUG-707","KM_Inicial":152219.0,"KM_Final":152257.0,"Recorrido":38.0,"Combustible":null,"Cambio_Aceite":null,"Mantenimiento":null,"Ocurrencias":null},{"Fecha":"2025-07-04","Turno":"DIA","Conductor":"ALVARO SUBILETA","Unidad_Movil":"EUG-707","KM_Inicial":152257.0,"KM_Final":152307.0,"Recorrido":50.0,"Combustible":null,"Cambio_Aceite":null,"Mantenimiento":null,"Ocurrencias":null},{"Fecha":"2025-07-04","Turno":"TARDE","Conductor":"FREBER MAMANI","Unidad_Movil":"EUG-707","KM_Inicial":152307.0,"KM_Final":152367.0,"Recorrido":60.0,"Combustible":null,"Cambio_Aceite":null,"Mantenimiento":null,"Ocurrencias":null},{"Fecha":"2025-07-04","Turno":"NOCHE","Conductor":"RULY PAREDES","Unidad_Movil":"EUG-707","KM_Inicial":152367.0,"KM_Final":152412.0,"Recorrido":45.0,"Combustible":null,"Cambio_Aceite":null,"Mantenimiento":null,"Ocurrencias":null},{"Fecha":"2025-07-05","Turno":"DIA","Conductor":"ALVARO SUBILETA","Unidad_Movil":"EUG-707","KM_Inicial":152412.0,"KM_Final":152481.0,"Recorrido":69.0,"Combustible":null,"Cambio_Aceite":null,"Mantenimiento":null,"Ocurrencias":null},{"Fecha":"2025-07-05","Turno":"TARDE","Conductor":"FREBER MAMANI","Unidad_Movil":"EUG-707","KM_Inicial":152481.0,"KM_Final":152544.0,"Recorrido":63.0,"Combustible":null,"Cambio_Aceite":null,"Mantenimiento":null,"Ocurrencias":null},{"Fecha":"2025-07-05","Turno":"NOCHE","Conductor":"RULY PAREDES","Unidad_Movil":"EUG-707","KM_Inicial":152544.0,"KM_Final":152594.0,"Recorrido":50.0,"Combustible":null,"Cambio_Aceite":null,"Mantenimiento":null,"Ocurrencias":null},{"Fecha":"2025-07-06","Turno":"DIA","Conductor":"ALVARO SUBILETA","Unidad_Movil":"EUG-707","KM_Inicial":152594.0,"KM_Final":152646.0,"Recorrido":52.0,"Combustible":null,"Cambio_Aceite":null,"Mantenimiento":null,"Ocurrencias":null},{"Fecha":"2025-07-06","Turno":"TARDE","Conductor":"FREBER MAMANI","Unidad_Movil":"EUG-707","KM_Inicial":152646.0,"KM_Final":152698.0,"Recorrido":52.0,"Combustible":null,"Cambio_Aceite":null,"Mantenimiento":null,"Ocurrencias":null},{"Fecha":"2025-07-06","Turno":"NOCHE","Conductor":"RULY PAREDES","Unidad_Movil":"EUG-707","KM_Inicial":152698.0,"KM_Final":152743.0,"Recorrido":45.0,"Combustible":null,"Cambio_Aceite":null,"Mantenimiento":null,"Ocurrencias":null},{"Fecha":"2025-07-07","Turno":"DIA","Conductor":"ALVARO SUBILETA","Unidad_Movil":"EUG-707","KM_Inicial":152743.0,"KM_Final":152803.0,"Recorrido":60.0,"Combustible":null,"Cambio_Aceite":"151 765","Mantenimiento":null,"Ocurrencias":null},{"Fecha":"2025-07-07","Turno":"TARDE","Conductor":"FREBER MAMANI","Unidad_Movil":"EUG-707","KM_Inicial":152803.0,"KM_Final":152871.0,"Recorrido":68.0,"Combustible":null,"Cambio_Aceite":null,"Mantenimiento":null,"Ocurrencias":null},{"Fecha":"2025-07-07","Turno":"NOCHE","Conductor":"RULY PAREDES","Unidad_Movil":"EUG-707","KM_Inicial":152871.0,"KM_Final":152918.0,"Recorrido":47.0,"Combustible":null,"Cambio_Aceite":null,"Mantenimiento":null,"Ocurrencias":null},{"Fecha":"2025-07-08","Turno":"DIA","Conductor":"GONZALO RAMIREZ","Unidad_Movil":"EUG-707","KM_Inicial":152918.0,"KM_Final":152988.0,"Recorrido":70.0,"Combustible":null,"Cambio_Aceite":null,"Mantenimiento":null,"Ocurrencias":null},{"Fecha":"2025-07-08","Turno":"TARDE","Conductor":"FREBER MAMANI","Unidad_Movil":"EUG-707","KM_Inicial":152988.0,"KM_Final":153068.0,"Recorrido":80.0,"Combustible":null,"Cambio_Aceite":null,"Mantenimiento":null,"Ocurrencias":null},{"Fecha":"2025-07-08","Turno":"NOCHE","Conductor":"JUNIOR PIÑA","Unidad_Movil":"EUG-707","KM_Inicial":153068.0,"KM_Final":153122.0,"Recorrido":54.0,"Combustible":null,"Cambio_Aceite":null,"Mantenimiento":null,"Ocurrencias":null},{"Fecha":"2025-07-09","Turno":"DIA","Conductor":"GONZALO RAMIREZ","Unidad_Movil":"EUG-707","KM_Inicial":153122.0,"KM_Final":153192.0,"Recorrido":70.0,"Combustible":null,"Cambio_Aceite":null,"Mantenimiento":null,"Ocurrencias":null},{"Fecha":"2025-07-09","Turno":"TARDE","Conductor":"GONZALO RAMIREZ","Unidad_Movil":"EUG-707","KM_Inicial":153192.0,"KM_Final":153268.0,"Recorrido":76.0,"Combustible":null,"Cambio_Aceite":null,"Mantenimiento":null,"Ocurrencias":null},{"Fecha":"2025-07-09","Turno":"NOCHE","Conductor":"RULY PAREDES","Unidad_Movil":"EUG-707","KM_Inicial":153268.0,"KM_Final":153322.0,"Recorrido":54.0,"Combustible":null,"Cambio_Aceite":null,"Mantenimiento":null,"Ocurrencias":null},{"Fecha":"2025-07-10","Turno":"DIA","Conductor":"GONZALO RAMIREZ","Unidad_Movil":"EUG-707","KM_Inicial":153322.0,"KM_Final":153369.0,"Recorrido":47.0,"Combustible":null,"Cambio_Aceite":null,"Mantenimiento":null,"Ocurrencias":null},{"Fecha":"2025-07-10","Turno":"TARDE","Conductor":"GONZALO RAMIREZ","Unidad_Movil":"EUG-707","KM_Inicial":153369.0,"KM_Final":153451.0,"Recorrido":82.0,"Combustible":null,"Cambio_Aceite":null,"Mantenimiento":null,"Ocurrencias":null},{"Fecha":"2025-07-10","Turno":"NOCHE","Conductor":"RULY PAREDES","Unidad_Movil":"EUG-707","KM_Inicial":153451.0,"KM_Final":153502.0,"Recorrido":50.0,"Combustible":null,"Cambio_Aceite":null,"Mantenimiento":null,"Ocurrencias":null},{"Fecha":"2025-07-11","Turno":"DIA","Conductor":"DAVID CACERES","Unidad_Movil":"EUG-707","KM_Inicial":153502.0,"KM_Final":153585.0,"Recorrido":83.0,"Combustible":null,"Cambio_Aceite":null,"Mantenimiento":null,"Ocurrencias":null},{"Fecha":"2025-07-11","Turno":"TARDE","Conductor":"FREBER MAMANI","Unidad_Movil":"EUG-707","KM_Inicial":153585.0,"KM_Final":153606.0,"Recorrido":21.0,"Combustible":null,"Cambio_Aceite":null,"Mantenimiento":null,"Ocurrencias":"SE ACUDIO A UN LLAMADO DE AUXILIO DEBIDO A PROTESTAS DE MINEROS EL PARABRISAS DE LA CAMIONETA TERMINO SIENDO IMPACTADA POR PIEDRAS PARABRISAS ROTO, FOCO DELANTERO IZQUIERDO ROTO"},{"Fecha":"2025-07-11","Turno":"NOCHE","Conductor":"RULY PAREDES","Unidad_Movil":"EUG-707","KM_Inicial":153606.0,"KM_Final":153650.0,"Recorrido":44.0,"Combustible":null,"Cambio_Aceite":null,"Mantenimiento":null,"Ocurrencias":null},{"Fecha":"2025-07-12","Turno":"DIA","Conductor":"GONZALO RAMIREZ","Unidad_Movil":"EUG-707","KM_Inicial":153650.0,"KM_Final":153686.0,"Recorrido":36.0,"Combustible":null,"Cambio_Aceite":null,"Mantenimiento":null,"Ocurrencias":null},{"Fecha":"2025-07-12","Turno":"TARDE","Conductor":"FREBER MAMANI","Unidad_Movil":"EUG-707","KM_Inicial":153686.0,"KM_Final":153754.0,"Recorrido":68.0,"Combustible":null,"Cambio_Aceite":null,"Mantenimiento":null,"Ocurrencias":null},{"Fecha":"2025-07-12","Turno":"NOCHE","Conductor":"RULY PAREDES","Unidad_Movil":"EUG-707","KM_Inicial":153754.0,"KM_Final":153806.0,"Recorrido":52.0,"Combustible":null,"Cambio_Aceite":null,"Mantenimiento":null,"Ocurrencias":null},{"Fecha":"2025-07-13","Turno":"DIA","Conductor":"GONZALO RAMIREZ","Unidad_Movil":"EUG-707","KM_Inicial":153806.0,"KM_Final":243.4,"Recorrido":null,"Combustible":null,"Cambio_Aceite":null,"Mantenimiento":null,"Ocurrencias":"MEDIANTE PATRULLAJE SE CALLO EL ESPEJO RETROVISOR DEBIDO AL PARABRISAS ROTO"},{"Fecha":"2025-07-13","Turno":"TARDE","Conductor":"FREBER MAMANI","Unidad_Movil":"EUG-717","KM_Inicial":151244.0,"KM_Final":151273.0,"Recorrido":29.0,"Combustible":null,"Cambio_Aceite":null,"Mantenimiento":null,"Ocurrencias":null},{"Fecha":"2025-07-13","Turno":"NOCHE","Conductor":"JUNIOR PIÑA","Unidad_Movil":"EUG-717","KM_Inicial":151273.0,"KM_Final":151338.0,"Recorrido":65.0,"Combustible":null,"Cambio_Aceite":null,"Mantenimiento":null,"Ocurrencias":null},{"Fecha":"2025-07-14","Turno":"DIA","Conductor":"ALVARO SUBILETA","Unidad_Movil":"EUG-717","KM_Inicial":151338.0,"KM_Final":151437.0,"Recorrido":99.0,"Combustible":null,"Cambio_Aceite":null,"Mantenimiento":null,"Ocurrencias":null},{"Fecha":"2025-07-14","Turno":"TARDE","Conductor":"FREBER MAMANI","Unidad_Movil":"EUG-717","KM_Inicial":151437.0,"KM_Final":151442.0,"Recorrido":5.0,"Combustible":null,"Cambio_Aceite":null,"Mantenimiento":null,"Ocurrencias":null},{"Fecha":"2025-07-14","Turno":"NOCHE","Conductor":"JUNIOR PIÑA","Unidad_Movil":"EUG-717","KM_Inicial":151442.0,"KM_Final":151480.0,"Recorrido":38.0,"Combustible":null,"Cambio_Aceite":null,"Mantenimiento":null,"Ocurrencias":null},{"Fecha":"2025-07-15","Turno":"DIA","Conductor":"RULY PAREDES","Unidad_Movil":"EUG-717","KM_Inicial":151480.0,"KM_Final":151556.0,"Recorrido":76.0,"Combustible":null,"Cambio_Aceite":null,"Mantenimiento":null,"Ocurrencias":null},{"Fecha":"2025-07-15","Turno":"DIA","Conductor":"DAVID CACERES","Unidad_Movil":"EX - 7680","KM_Inicial":48217.0,"KM_Final":48339.0,"Recorrido":120.0,"Combustible":null,"Cambio_Aceite":null,"Mantenimiento":null,"Ocurrencias":null},{"Fecha":"2025-07-15","Turno":"DIA","Conductor":"FREBER MAMANI","Unidad_Movil":"EX - 7664","KM_Inicial":39029.0,"KM_Final":39148.0,"Recorrido":119.0,"Combustible":null,"Cambio_Aceite":null,"Mantenimiento":null,"Ocurrencias":null},{"Fecha":"2025-07-15","Turno":"TARDE","Conductor":"JUNIOR PIÑA","Unidad_Movil":"EUG-717","KM_Inicial":151556.0,"KM_Final":151655.0,"Recorrido":99.0,"Combustible":null,"Cambio_Aceite":null,"Mantenimiento":null,"Ocurrencias":null},{"Fecha":"2025-07-15","Turno":"NOCHE","Conductor":"ALVARO SUBILETA","Unidad_Movil":"EUG-717","KM_Inicial":151655.0,"KM_Final":151725.0,"Recorrido":70.0,"Combustible":null,"Cambio_Aceite":null,"Mantenimiento":null,"Ocurrencias":null},{"Fecha":"2025-07-16","Turno":"DIA","Conductor":"RULY PAREDES","Unidad_Movil":"EUG-717","KM_Inicial":151725.0,"KM_Final":151788.0,"Recorrido":63.0,"Combustible":null,"Cambio_Aceite":null,"Mantenimiento":null,"Ocurrencias":null},{"Fecha":"2025-07-16","Turno":"DIA","Conductor":"DAVID CACERES","Unidad_Movil":"EX - 7680","KM_Inicial":48339.0,"KM_Final":null,"Recorrido":null,"Combustible":null,"Cambio_Aceite":null,"Mantenimiento":null,"Ocurrencias":null},{"Fecha":"2025-07-16","Turno":"DIA","Conductor":"SAID GAMARRA","Unidad_Movil":"EX -7664","KM_Inicial":39148.0,"KM_Final":null,"Recorrido":null,"Combustible":null,"Cambio_Aceite":null,"Mantenimiento":null,"Ocurrencias":null},{"Fecha":"2025-07-16","Turno":"TARDE","Conductor":"JUNIOR PIÑA","Unidad_Movil":"EUG-717","KM_Inicial":151788.0,"KM_Final":151845.0,"Recorrido":56.0,"Combustible":null,"Cambio_Aceite":null,"Mantenimiento":null,"Ocurrencias":null},{"Fecha":"2025-07-16","Turno":"NOCHE","Conductor":"ALVARO SUBILETA","Unidad_Movil":"EUG-717","KM_Inicial":151845.0,"KM_Final":151889.0,"Recorrido":44.0,"Combustible":null,"Cambio_Aceite":null,"Mantenimiento":null,"Ocurrencias":null},{"Fecha":"2025-07-17","Turno":"DIA","Conductor":"RULY PAREDES","Unidad_Movil":"EUG-717","KM_Inicial":151889.0,"KM_Final":151960.0,"Recorrido":71.0,"Combustible":null,"Cambio_Aceite":null,"Mantenimiento":null,"Ocurrencias":null},{"Fecha":"2025-07-17","Turno":"TARDE","Conductor":"JUNIOR PIÑA","Unidad_Movil":"EUG-717","KM_Inicial":151960.0,"KM_Final":152043.0,"Recorrido":83.0,"Combustible":null,"Cambio_Aceite":null,"Mantenimiento":null,"Ocurrencias":null},{"Fecha":"2025-07-17","Turno":"NOCHE","Conductor":"ALVARO SUBILETA","Unidad_Movil":"EUG-717","KM_Inicial":152043.0,"KM_Final":152084.0,"Recorrido":41.0,"Combustible":null,"Cambio_Aceite":null,"Mantenimiento":null,"Ocurrencias":null},{"Fecha":"2025-07-18","Turno":"DIA","Conductor":"RULY PAREDES","Unidad_Movil":"EUG-717","KM_Inicial":152084.0,"KM_Final":152148.0,"Recorrido":64.0,"Combustible":null,"Cambio_Aceite":null,"Mantenimiento":null,"Ocurrencias":null},{"Fecha":"2025-07-18","Turno":"TARDE","Conductor":"JUNIOR PIÑA","Unidad_Movil":"EUG-717","KM_Inicial":152148.0,"KM_Final":152233.0,"Recorrido":85.0,"Combustible":null,"Cambio_Aceite":null,"Mantenimiento":null,"Ocurrencias":null},{"Fecha":"2025-07-18","Turno":"NOCHE","Conductor":"ALVARO SUBILETA","Unidad_Movil":"EUG-717","KM_Inicial":152233.0,"KM_Final":152313.0,"Recorrido":80.0,"Combustible":null,"Cambio_Aceite":null,"Mantenimiento":null,"Ocurrencias":null},{"Fecha":"2025-07-19","Turno":"DIA","Conductor":"FREBER MAMANI","Unidad_Movil":"EUG-717","KM_Inicial":152313.0,"KM_Final":152373.0,"Recorrido":60.0,"Combustible":null,"Cambio_Aceite":null,"Mantenimiento":null,"Ocurrencias":null},{"Fecha":"2025-07-19","Turno":"TARDE","Conductor":"JUNIOR PIÑA","Unidad_Movil":"EUG-717","KM_Inicial":152373.0,"KM_Final":152463.0,"Recorrido":90.0,"Combustible":null,"Cambio_Aceite":null,"Mantenimiento":null,"Ocurrencias":null},{"Fecha":"2025-07-19","Turno":"NOCHE","Conductor":"ALVARO SUBILETA","Unidad_Movil":"EUG-717","KM_Inicial":152463.0,"KM_Final":152523.0,"Recorrido":60.0,"Combustible":null,"Cambio_Aceite":null,"Mantenimiento":null,"Ocurrencias":null},{"Fecha":"2025-07-20","Turno":"DIA","Conductor":"RULY PAREDES","Unidad_Movil":"EUG-717","KM_Inicial":152523.0,"KM_Final":152600.0,"Recorrido":77.0,"Combustible":null,"Cambio_Aceite":null,"Mantenimiento":null,"Ocurrencias":null},{"Fecha":"2025-07-20","Turno":"TARDE","Conductor":"JUNIOR PIÑA","Unidad_Movil":"EUG-717","KM_Inicial":152600.0,"KM_Final":152672.0,"Recorrido":72.0,"Combustible":null,"Cambio_Aceite":null,"Mantenimiento":null,"Ocurrencias":null},{"Fecha":"2025-07-20","Turno":"NOCHE","Conductor":"ALVARO SUBILETA","Unidad_Movil":"EUG-717","KM_Inicial":152672.0,"KM_Final":152736.0,"Recorrido":64.0,"Combustible":null,"Cambio_Aceite":null,"Mantenimiento":null,"Ocurrencias":null},{"Fecha":"2025-07-21","Turno":"DIA","Conductor":"RULY PAREDES","Unidad_Movil":"EUG-717","KM_Inicial":152736.0,"KM_Final":152800.0,"Recorrido":64.0,"Combustible":null,"Cambio_Aceite":null,"Mantenimiento":null,"Ocurrencias":null},{"Fecha":"2025-07-21","Turno":"TARDE","Conductor":"JUNIOR PIÑA","Unidad_Movil":"EUG-717","KM_Inicial":152800.0,"KM_Final":152875.0,"Recorrido":75.0,"Combustible":null,"Cambio_Aceite":null,"Mantenimiento":null,"Ocurrencias":null},{"Fecha":"2025-07-21","Turno":"NOCHE","Conductor":"ALVARO SUBILETA","Unidad_Movil":"EUG-717","KM_Inicial":152875.0,"KM_Final":152914.0,"Recorrido":39.0,"Combustible":null,"Cambio_Aceite":null,"Mantenimiento":null,"Ocurrencias":null},{"Fecha":"2025-07-22","Turno":"DIA","Conductor":"RULY PAREDES","Unidad_Movil":"EUG-717","KM_Inicial":152914.0,"KM_Final":152994.0,"Recorrido":80.0,"Combustible":null,"Cambio_Aceite":null,"Mantenimiento":null,"Ocurrencias":null},{"Fecha":"2025-07-22","Turno":"TARDE","Conductor":"JUNIOR PIÑA","Unidad_Movil":"EUG-717","KM_Inicial":152994.0,"KM_Final":153077.0,"Recorrido":83.0,"Combustible":null,"Cambio_Aceite":null,"Mantenimiento":null,"Ocurrencias":"SE RELEVO LA CAMIONETA CON LA PANTALLA DE AUTORADIO ROTA"},{"Fecha":"2025-07-22","Turno":"NOCHE","Conductor":"ALVARO SUBILETA","Unidad_Movil":"EUG-717","KM_Inicial":153077.0,"KM_Final":153159.0,"Recorrido":82.0,"Combustible":null,"Cambio_Aceite":null,"Mantenimiento":null,"Ocurrencias":null},{"Fecha":"2025-07-23","Turno":"DIA","Conductor":"RULY PAREDES","Unidad_Movil":"EUG-717","KM_Inicial":153159.0,"KM_Final":153230.0,"Recorrido":71.0,"Combustible":null,"Cambio_Aceite":null,"Mantenimiento":null,"Ocurrencias":null},{"Fecha":"2025-07-23","Turno":"TARDE","Conductor":"JUNIOR PIÑA","Unidad_Movil":"EUG-717","KM_Inicial":153230.0,"KM_Final":153307.0,"Recorrido":77.0,"Combustible":null,"Cambio_Aceite":null,"Mantenimiento":null,"Ocurrencias":null},{"Fecha":"2025-07-23","Turno":"NOCHE","Conductor":"GONZALO RAMIREZ","Unidad_Movil":"EUG-717","KM_Inicial":153307.0,"KM_Final":153390.0,"Recorrido":83.0,"Combustible":null,"Cambio_Aceite":null,"Mantenimiento":null,"Ocurrencias":null},{"Fecha":"2025-07-24","Turno":"DIA","Conductor":"RULY PAREDES","Unidad_Movil":"EUG-717","KM_Inicial":153390.0,"KM_Final":153455.0,"Recorrido":65.0,"Combustible":null,"Cambio_Aceite":null,"Mantenimiento":null,"Ocurrencias":null},{"Fecha":"2025-07-24","Turno":"TARDE","Conductor":"WILSON LUDEÑA","Unidad_Movil":"EUG-717","KM_Inicial":153455.0,"KM_Final":153522.0,"Recorrido":67.0,"Combustible":null,"Cambio_Aceite":null,"Mantenimiento":null,"Ocurrencias":null},{"Fecha":"2025-07-24","Turno":"NOCHE","Conductor":"ALVARO SUBILETA","Unidad_Movil":"EUG-717","KM_Inicial":153522.0,"KM_Final":153563.0,"Recorrido":41.0,"Combustible":null,"Cambio_Aceite":null,"Mantenimiento":null,"Ocurrencias":null},{"Fecha":"2025-07-25","Turno":"DIA","Conductor":"RULY PAREDES","Unidad_Movil":"EUG-717","KM_Inicial":153563.0,"KM_Final":153606.0,"Recorrido":43.0,"Combustible":null,"Cambio_Aceite":null,"Mantenimiento":null,"Ocurrencias":null},{"Fecha":"2025-07-25","Turno":"TARDE","Conductor":"WILSON LUDEÑA","Unidad_Movil":"EUG-717","KM_Inicial":153606.0,"KM_Final":153666.0,"Recorrido":60.0,"Combustible":180.0,"Cambio_Aceite":null,"Mantenimiento":null,"Ocurrencias":null},{"Fecha":"2025-07-25","Turno":"NOCHE","Conductor":"ALVARO SUBILETA","Unidad_Movil":"EUG-717","KM_Inicial":153666.0,"KM_Final":153740.0,"Recorrido":74.0,"Combustible":null,"Cambio_Aceite":null,"Mantenimiento":null,"Ocurrencias":null},{"Fecha":"2025-07-26","Turno":"DIA","Conductor":"FREBER MAMANI","Unidad_Movil":"EUG-717","KM_Inicial":153740.0,"KM_Final":153819.0,"Recorrido":79.0,"Combustible":null,"Cambio_Aceite":null,"Mantenimiento":null,"Ocurrencias":null},{"Fecha":"2025-07-26","Turno":"TARDE","Conductor":"WILSON LUDEÑA","Unidad_Movil":"EUG-717","KM_Inicial":153819.0,"KM_Final":153882.0,"Recorrido":63.0,"Combustible":null,"Cambio_Aceite":null,"Mantenimiento":null,"Ocurrencias":null},{"Fecha":"2025-07-26","Turno":"NOCHE","Conductor":"ALVARO SUBILETA","Unidad_Movil":"EUG-717","KM_Inicial":153882.0,"KM_Final":153962.0,"Recorrido":80.0,"Combustible":null,"Cambio_Aceite":null,"Mantenimiento":null,"Ocurrencias":null},{"Fecha":"2025-07-27","Turno":"DIA","Conductor":"RULY PAREDES","Unidad_Movil":"EUG-717","KM_Inicial":153962.0,"KM_Final":154040.0,"Recorrido":78.0,"Combustible":null,"Cambio_Aceite":null,"Mantenimiento":null,"Ocurrencias":null},{"Fecha":"2025-07-27","Turno":"TARDE","Conductor":"WILSON LUDEÑA","Unidad_Movil":"EUG-717","KM_Inicial":154040.0,"KM_Final":154114.0,"Recorrido":74.0,"Combustible":170.0,"Cambio_Aceite":null,"Mantenimiento":null,"Ocurrencias":null},{"Fecha":"2025-07-27","Turno":"NOCHE","Conductor":"ALVARO SUBILETA","Unidad_Movil":"EUG-717","KM_Inicial":154114.0,"KM_Final":154150.0,"Recorrido":36.0,"Combustible":null,"Cambio_Aceite":null,"Mantenimiento":null,"Ocurrencias":null},{"Fecha":"2025-07-28","Turno":"DIA","Conductor":"RULY PAREDES","Unidad_Movil":"EUG-717","KM_Inicial":154150.0,"KM_Final":154230.0,"Recorrido":80.0,"Combustible":null,"Cambio_Aceite":null,"Mantenimiento":null,"Ocurrencias":null},{"Fecha":"2025-07-28","Turno":"TARDE","Conductor":"JUNIOR PIÑA","Unidad_Movil":"EUG-717","KM_Inicial":154230.0,"KM_Final":154318.0,"Recorrido":88.0,"Combustible":null,"Cambio_Aceite":null,"Mantenimiento":null,"Ocurrencias":null},{"Fecha":"2025-07-28","Turno":"NOCHE","Conductor":"ALVARO SUBILETA","Unidad_Movil":"EUG-717","KM_Inicial":154318.0,"KM_Final":154380.0,"Recorrido":62.0,"Combustible":null,"Cambio_Aceite":null,"Mantenimiento":null,"Ocurrencias":null},{"Fecha":"2025-07-29","Turno":"DIA","Conductor":"RULY PAREDES","Unidad_Movil":"EUG-717","KM_Inicial":154380.0,"KM_Final":154452.0,"Recorrido":72.0,"Combustible":200.0,"Cambio_Aceite":null,"Mantenimiento":null,"Ocurrencias":null},{"Fecha":"2025-07-29","Turno":"TARDE","Conductor":"WILSON LUDEÑA","Unidad_Movil":"EUG-717","KM_Inicial":154452.0,"KM_Final":154548.0,"Recorrido":96.0,"Combustible":null,"Cambio_Aceite":null,"Mantenimiento":null,"Ocurrencias":null},{"Fecha":"2025-07-29","Turno":"NOCHE","Conductor":"GONZALO RAMIREZ","Unidad_Movil":"EUG-717","KM_Inicial":154548.0,"KM_Final":154598.0,"Recorrido":50.0,"Combustible":null,"Cambio_Aceite":null,"Mantenimiento":null,"Ocurrencias":null},{"Fecha":"2025-07-30","Turno":"DIA","Conductor":"RULY PAREDES","Unidad_Movil":"EUG-717","KM_Inicial":154598.0,"KM_Final":154682.0,"Recorrido":84.0,"Combustible":null,"Cambio_Aceite":null,"Mantenimiento":null,"Ocurrencias":null},{"Fecha":"2025-07-30","Turno":"TARDE","Conductor":"WILSON LUDEÑA","Unidad_Movil":"EUG-717","KM_Inicial":154682.0,"KM_Final":154773.0,"Recorrido":91.0,"Combustible":null,"Cambio_Aceite":null,"Mantenimiento":null,"Ocurrencias":null},{"Fecha":"2025-07-30","Turno":"NOCHE","Conductor":"ALVARO SUBILETA","Unidad_Movil":"EUG-717","KM_Inicial":154773.0,"KM_Final":154817.0,"Recorrido":null,"Combustible":null,"Cambio_Aceite":null,"Mantenimiento":null,"Ocurrencias":null},{"Fecha":"2025-07-31","Turno":"DIA","Conductor":"RULY PAREDES","Unidad_Movil":"EUG-717","KM_Inicial":154817.0,"KM_Final":154869.0,"Recorrido":null,"Combustible":null,"Cambio_Aceite":null,"Mantenimiento":null,"Ocurrencias":null},{"Fecha":"2025-07-31","Turno":"TARDE","Conductor":"JUNIOR PIÑA","Unidad_Movil":"EUG-717","KM_Inicial":154869.0,"KM_Final":null,"Recorrido":null,"Combustible":null,"Cambio_Aceite":null,"Mantenimiento":null,"Ocurrencias":null},{"Fecha":"2025-07-31","Turno":null,"Conductor":null,"Unidad_Movil":"EUG-717","KM_Inicial":null,"KM_Final":null,"Recorrido":null,"Combustible":null,"Cambio_Aceite":null,"Mantenimiento":null,"Ocurrencias":null}];
+
+    /* ====== Vehículos fijos (4 casillas) ====== */
+    const VEHICULOS = [
+      { id: 'EUG-707', tipo: 'Camioneta' },
+      { id: 'EUG-717', tipo: 'Camioneta' },
+      { id: 'EX-7680', tipo: 'Motocicleta' },
+      { id: 'EX-7664', tipo: 'Motocicleta' },
+    ];
 
     /* ===== Overlay errores ===== */
     (function () {
@@ -136,22 +198,19 @@
       window.addEventListener('unhandledrejection', ev => { box.style.display='block'; box.textContent = 'Error Promesa: '+(ev.reason?.message || ev.reason || ''); });
     })();
 
-    /* ===== Helpers ===== */
     const TURNOS = ["DIA","TARDE","NOCHE"];
     const toNumber = v => Number.isFinite(+v) ? +v : 0;
     const parseDateISO = s => { const d = new Date(s); return isNaN(d.getTime()) ? null : d; };
     const formatISO = d => d.toISOString().slice(0,10);
 
-    // Mapeo EXACTO solicitado:
-    // EUG-117 y EUG-707 => Camioneta; EX-7680 y EX-7664 => Motocicleta; otros => Otro
-    function getVehicleType(unidad) {
-      if (!unidad) return "Otro";
-      const s = String(unidad).toUpperCase().replace(/\s+/g,'');
-      if (s.includes('EUG117') || s.includes('EUG-117')) return "Camioneta";
-      if (s.includes('EUG707') || s.includes('EUG-707')) return "Camioneta";
-      if (s.includes('EX7680') || s.includes('EX-7680')) return "Motocicleta";
-      if (s.includes('EX7664') || s.includes('EX-7664')) return "Motocicleta";
-      return "Otro";
+    function canonicalUnidad(u){
+      if(!u) return '';
+      return String(u).toUpperCase().replace(/\s+/g,'').replace('EX-','EX-').replace('EUG-','EUG-');
+    }
+    function getVehicleType(unidad){
+      const cu = canonicalUnidad(unidad);
+      const found = VEHICULOS.find(v => cu.includes(v.id));
+      return found ? found.tipo : 'Otro';
     }
 
     function getMinMaxDate(rows){
@@ -173,37 +232,42 @@
       return { combustiblePorTurno, kmPromedioPorTurno, recorridoTotalPorTurno, totalComb, totalRec };
     }
 
-    function filtrarDatos(rows, startDate, endDate, conductoresSeleccionados, tiposSeleccionados){
+    function filtrarDatos(rows, startDate, endDate, conductoresSeleccionados, vehiculosSeleccionados){
       const sd = startDate ? parseDateISO(startDate) : null;
       const ed = endDate   ? parseDateISO(endDate)   : null;
-      const setCond  = new Set(conductoresSeleccionados);
-      const setTipos = new Set(tiposSeleccionados);
+      const setCond = new Set(conductoresSeleccionados);
+      const setVeh  = new Set(vehiculosSeleccionados); // contiene IDs como 'EUG-707'
       return rows.filter(item => {
         const f = parseDateISO(item.Fecha);
-        const byDate  = (!sd || (f && f >= sd)) && (!ed || (f && f <= ed));
-        const byCond  = !setCond.size  || setCond.has(String(item.Conductor||""));
-        const tipo    = getVehicleType(item.Unidad_Movil);
-        const byTipo  = !setTipos.size || setTipos.has(tipo);
-        return byDate && byCond && byTipo;
+        const byDate = (!sd || (f && f >= sd)) && (!ed || (f && f <= ed));
+        const byCond = !setCond.size || setCond.has(String(item.Conductor||""));
+        const unidadCanon = canonicalUnidad(item.Unidad_Movil);
+        // si no seleccionaron nada, no filtra por unidad
+        const byVeh  = !setVeh.size || Array.from(setVeh).some(id => unidadCanon.includes(id));
+        return byDate && byCond && byVeh;
       });
     }
 
     /* ===== Charts ===== */
     let combustibleChart, kmPromedioChart, recorridoTotalChart;
     const commonOptions = {
-      responsive:true, maintainAspectRatio:false, resizeDelay:200,
-      interaction:{mode:'index',intersect:false},
-      plugins:{ legend:{position:'top', labels:{boxWidth:12, usePointStyle:true} } },
-      scales:{ x:{ ticks:{ maxRotation:0, autoSkip:true } }, y:{ beginAtZero:true, ticks:{ autoSkip:true } } }
+      responsive:true, maintainAspectRatio:false, resizeDelay:150, interaction:{mode:'index', intersect:false},
+      plugins:{
+        legend:{ position:'top', labels:{ boxWidth:12, usePointStyle:true, color:getComputedStyle(document.documentElement).getPropertyValue('--muted') } },
+        tooltip:{ backgroundColor:'rgba(15,23,42,.9)', borderColor:'rgba(255,255,255,.1)', borderWidth:1 }
+      },
+      scales:{
+        x:{ grid:{ color:getComputedStyle(document.documentElement).getPropertyValue('--grid') }, ticks:{ color:getComputedStyle(document.documentElement).getPropertyValue('--muted') } },
+        y:{ beginAtZero:true, grid:{ color:getComputedStyle(document.documentElement).getPropertyValue('--grid') }, ticks:{ color:getComputedStyle(document.documentElement).getPropertyValue('--muted') } }
+      }
     };
-
     function initCharts(kpis){
       const c1 = document.getElementById('combustibleChart').getContext('2d');
       const c2 = document.getElementById('kmPromedioChart').getContext('2d');
       const c3 = document.getElementById('recorridoTotalChart').getContext('2d');
-      combustibleChart = new Chart(c1, { type:'bar', data:{ labels:["DÍA","TARDE","NOCHE"], datasets:[{ label:'Combustible por Turno (suma)', data:kpis.combustiblePorTurno }] }, options:commonOptions });
-      kmPromedioChart = new Chart(c2, { type:'bar', data:{ labels:["DÍA","TARDE","NOCHE"], datasets:[{ label:'Kilometraje Promedio por Turno', data:kpis.kmPromedioPorTurno }] }, options:commonOptions });
-      recorridoTotalChart = new Chart(c3, { type:'bar', data:{ labels:["DÍA","TARDE","NOCHE"], datasets:[{ label:'Recorrido Total por Turno', data:kpis.recorridoTotalPorTurno }] }, options:commonOptions });
+      combustibleChart = new Chart(c1, { type:'bar', data:{ labels:["DÍA","TARDE","NOCHE"], datasets:[{ label:'Combustible por Turno (suma)', data:kpis.combustiblePorTurno, borderWidth:1 }] }, options:commonOptions });
+      kmPromedioChart = new Chart(c2, { type:'bar', data:{ labels:["DÍA","TARDE","NOCHE"], datasets:[{ label:'Kilometraje Promedio por Turno', data:kpis.kmPromedioPorTurno, borderWidth:1 }] }, options:commonOptions });
+      recorridoTotalChart = new Chart(c3, { type:'bar', data:{ labels:["DÍA","TARDE","NOCHE"], datasets:[{ label:'Recorrido Total por Turno', data:kpis.recorridoTotalPorTurno, borderWidth:1 }] }, options:commonOptions });
     }
     function updateCharts(kpis){
       if(!(combustibleChart && kmPromedioChart && recorridoTotalChart)) return;
@@ -213,7 +277,6 @@
       combustibleChart.update(); kmPromedioChart.update(); recorridoTotalChart.update();
     }
 
-    /* ===== Tarjetas y tablas ===== */
     function renderKpiCards(kpis, registros, totalRegistros){
       document.getElementById('kpiCombustibleTotal').textContent = kpis.totalComb.toFixed(2);
       document.getElementById('kpiRecorridoTotal').textContent   = kpis.totalRec.toFixed(2);
@@ -228,7 +291,7 @@
     }
     function renderRawTable(rows){
       const wrap=document.getElementById('rawTableWrap');
-      function safe(v){ return (v===null||v===undefined)?'':v; }
+      const safe = v => (v===null||v===undefined)?'':v;
       wrap.innerHTML = `<table><thead><tr>
         <th>Fecha</th><th>Turno</th><th>Conductor</th><th>Unidad_Movil</th><th>Tipo_Vehículo</th>
         <th>KM_Inicial</th><th>KM_Final</th><th>Recorrido</th><th>Combustible</th><th>Cambio_Aceite</th><th>Mantenimiento</th><th>Ocurrencias</th>
@@ -242,71 +305,87 @@
       }</tbody></table>`;
     }
 
-    /* ===== Checklists ===== */
-    function buildCheckboxList({values, listId, chkAllId, infoId}){
-      const listEl=document.getElementById(listId);
-      const chkAll=document.getElementById(chkAllId);
-      const infoEl=document.getElementById(infoId);
+    /* UI: conductores y vehículos */
+    function buildConductores(){
+      const listEl=document.getElementById('conductoresList');
+      const chkAll=document.getElementById('chkTodosConductores');
+      const infoEl=document.getElementById('infoConductores');
+      const buscarEl=document.getElementById('buscarConductor');
 
+      function conductoresValues(){
+        const txt=(buscarEl.value||'').toLowerCase();
+        const set=new Set(DATA.map(r=>(r.Conductor||'').trim()).filter(Boolean));
+        return Array.from(set).filter(n=>n.toLowerCase().includes(txt)).sort((a,b)=>a.localeCompare(b,'es',{sensitivity:'base'}));
+      }
       function render(){
-        listEl.innerHTML = values().map(v=>{
-          const id=(listId+'_'+v).replace(/[^a-z0-9]+/gi,'_');
-          return `<label class="item"><input type="checkbox" class="chk-item" data-value="${v}" id="${id}" checked /> ${v}</label>`;
-        }).join('');
+        const arr=conductoresValues();
+        listEl.innerHTML = arr.map(v=>`<label class="check"><input type="checkbox" class="chk-cond" data-value="${v}" checked/> <span>${v}</span></label>`).join('');
         updateInfo();
       }
-      function getSeleccionados(){ const sel=[]; listEl.querySelectorAll('.chk-item').forEach(chk=>{ if(chk.checked) sel.push(chk.getAttribute('data-value')); }); return sel; }
-      function setAll(checked){ listEl.querySelectorAll('.chk-item').forEach(chk=> chk.checked=checked); updateInfo(); }
-      function updateInfo(){ const total=listEl.querySelectorAll('.chk-item').length; const sel=getSeleccionados().length; infoEl.textContent=`Seleccionados: ${sel} / ${total}`; chkAll.checked=(sel===total && total>0); chkAll.indeterminate = sel>0 && sel<total; }
+      function getSeleccionados(){
+        const sel=[]; listEl.querySelectorAll('.chk-cond').forEach(chk=>{ if(chk.checked) sel.push(chk.getAttribute('data-value')); });
+        return sel;
+      }
+      function setAll(checked){ listEl.querySelectorAll('.chk-cond').forEach(chk=> chk.checked=checked); updateInfo(); }
+      function updateInfo(){ const total=listEl.querySelectorAll('.chk-cond').length; const sel=getSeleccionados().length; infoEl.textContent=`Seleccionados: ${sel} / ${total}`; chkAll.checked=(sel===total && total>0); chkAll.indeterminate= sel>0 && sel<total; }
 
-      listEl.addEventListener('change', e=>{ if(e.target.classList.contains('chk-item')) updateInfo(); });
+      listEl.addEventListener('change', e=>{ if(e.target.classList.contains('chk-cond')) updateInfo(); });
       chkAll.addEventListener('change', ()=> setAll(chkAll.checked));
+      buscarEl.addEventListener('input', render);
 
       render();
       return { getSeleccionados, render };
     }
 
-    /* ===== Wiring ===== */
+    function buildVehiculos(){
+      const listEl=document.getElementById('vehiculosList');
+      const chkAll=document.getElementById('chkTodosVehiculos');
+      const infoEl=document.getElementById('infoVehiculos');
+
+      function render(){
+        listEl.innerHTML = VEHICULOS.map(v=>{
+          return `<label class="check"><input type="checkbox" class="chk-veh" data-id="${v.id}" checked/> <span>${v.id} — ${v.tipo}</span></label>`;
+        }).join('');
+        updateInfo();
+      }
+      function getSeleccionados(){
+        const sel=[]; listEl.querySelectorAll('.chk-veh').forEach(chk=>{ if(chk.checked) sel.push(chk.getAttribute('data-id')); });
+        return sel;
+      }
+      function setAll(checked){ listEl.querySelectorAll('.chk-veh').forEach(chk=> chk.checked=checked); updateInfo(); }
+      function updateInfo(){ const total=listEl.querySelectorAll('.chk-veh').length; const sel=getSeleccionados().length; infoEl.textContent=`Seleccionados: ${sel} / ${total}`; chkAll.checked=(sel===total && total>0); chkAll.indeterminate= sel>0 && sel<total; }
+
+      listEl.addEventListener('change', e=>{ if(e.target.classList.contains('chk-veh')) updateInfo(); });
+      chkAll.addEventListener('change', ()=> setAll(chkAll.checked));
+
+      render();
+      return { getSeleccionados };
+    }
+
+    /* Wiring */
     document.addEventListener('DOMContentLoaded', ()=>{
       const startEl=document.getElementById('startDate');
       const endEl=document.getElementById('endDate');
       const btn=document.getElementById('btnFiltrar');
-      const buscarEl=document.getElementById('buscarConductor');
 
-      // Rango de fechas por defecto
-      const {min,max}=getMinMaxDate(DATA);
+      const {min,max} = getMinMaxDate(DATA);
       if(min) startEl.value=formatISO(min);
       if(max) endEl.value=formatISO(max);
 
-      // Conductores (con buscador)
-      function conductoresValues(){
-        const txt=(buscarEl.value||'').toLowerCase();
-        const set=new Set(DATA.map(r=>(r.Conductor||'').trim()).filter(Boolean));
-        return Array.from(set).filter(n=> n.toLowerCase().includes(txt)).sort((a,b)=>a.localeCompare(b,'es',{sensitivity:'base'}));
-      }
-      const uiConductores=buildCheckboxList({ values:conductoresValues, listId:'conductoresList', chkAllId:'chkTodosConductores', infoId:'infoConductores' });
-      buscarEl.addEventListener('input', ()=> uiConductores.render());
+      const uiConductores = buildConductores();
+      const uiVehiculos   = buildVehiculos();
 
-      // Tipos de vehículo (según mapeo)
-      function tiposValues(){
-        const set=new Set(DATA.map(r=> getVehicleType(r.Unidad_Movil)));
-        return Array.from(set).sort((a,b)=>a.localeCompare(b,'es',{sensitivity:'base'}));
-      }
-      const uiTipos=buildCheckboxList({ values:tiposValues, listId:'tiposList', chkAllId:'chkTodosTipos', infoId:'infoTipos' });
-
-      // Inicial
       const kpisInit=calcularKPIs(DATA);
       initCharts(kpisInit);
       renderKpiCards(kpisInit, DATA.length, DATA.length);
       renderKpiTable(kpisInit);
-      renderRawTable(DATA); // tabla completa sin filtros
+      renderRawTable(DATA);
 
-      // Aplicar filtros a KPIs/gráficos/tabla pequeña
       function aplicarFiltros(){
-        const seleccionConductores = uiConductores.getSeleccionados();
-        const seleccionTipos       = uiTipos.getSeleccionados();
-        const filtered = filtrarDatos(DATA, startEl.value, endEl.value, seleccionConductores, seleccionTipos);
-        const kpis     = calcularKPIs(filtered);
+        const conds = uiConductores.getSeleccionados();
+        const vehs  = uiVehiculos.getSeleccionados(); // IDs exactos
+        const filtered = filtrarDatos(DATA, startEl.value, endEl.value, conds, vehs);
+        const kpis = calcularKPIs(filtered);
         updateCharts(kpis);
         renderKpiCards(kpis, filtered.length, DATA.length);
         renderKpiTable(kpis);
@@ -316,16 +395,14 @@
       startEl.addEventListener('change', aplicarFiltros);
       endEl.addEventListener('change', aplicarFiltros);
       document.getElementById('conductoresList').addEventListener('change', aplicarFiltros);
+      document.getElementById('vehiculosList').addEventListener('change', aplicarFiltros);
       document.getElementById('chkTodosConductores').addEventListener('change', aplicarFiltros);
-      document.getElementById('tiposList').addEventListener('change', aplicarFiltros);
-      document.getElementById('chkTodosTipos').addEventListener('change', aplicarFiltros);
+      document.getElementById('chkTodosVehiculos').addEventListener('change', aplicarFiltros);
     });
   </script>
 </body>
 </html>
 
-  
-  
+     
    
 
-    
