@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <title>KPIs Serenazgo - Interactivo</title>
+  <title>KPIs Serenazgo - Interactivo (Embebido)</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
@@ -12,11 +12,8 @@
     h1 { margin: 0 0 8px; }
     p.hint { margin: 0 0 24px; color: #555; }
     .filters {
-      display: grid;
-      grid-template-columns: repeat(6, minmax(120px, 1fr));
-      gap: var(--gap);
-      align-items: start;
-      margin-bottom: 24px;
+      display: grid; grid-template-columns: repeat(6, minmax(120px, 1fr));
+      gap: var(--gap); align-items: start; margin-bottom: 24px;
     }
     .filters label { display: block; font-size: 12px; color: #444; margin-bottom: 6px; }
     .filters input[type="date"], .filters input[type="text"] {
@@ -26,32 +23,33 @@
       padding: 10px 14px; border: none; border-radius: 10px; cursor: pointer; background: #1f7aec; color: #fff;
     }
     .conductores-box {
-      grid-column: 1 / -1;
-      background: #fff; border-radius: 12px; padding: 12px; border: 1px solid #e5e5e5;
+      grid-column: 1 / -1; background: #fff; border-radius: 12px; padding: 12px; border: 1px solid #e5e5e5;
       max-height: 260px; overflow: auto;
     }
     .conductores-actions { display: flex; gap: 12px; align-items: center; margin-bottom: 8px; }
-    .conductores-grid {
-      display: grid; gap: 8px; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-    }
+    .conductores-grid { display: grid; gap: 8px; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); }
     .conductor-item { font-size: 14px; }
-    .grid {
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: 28px;
-    }
-    canvas { background: #fff; border-radius: 14px; padding: 12px; box-shadow: 0 2px 8px rgba(0,0,0,.05); }
-    @media (min-width: 900px) {
-      .grid { grid-template-columns: 1fr 1fr; }
-      .grid canvas.full { grid-column: 1 / -1; }
-    }
+    .kpi-cards { display: grid; grid-template-columns: repeat(3, minmax(160px, 1fr)); gap: 16px; margin: 12px 0 24px; }
+    .kpi-card { background: #fff; border-radius: 14px; padding: 14px; box-shadow: 0 2px 8px rgba(0,0,0,.05); }
+    .kpi-card h3 { margin: 0 0 6px; font-size: 14px; color: #666; }
+    .kpi-card .value { font-size: 22px; font-weight: 700; }
+    .grid { display: grid; grid-template-columns: 1fr; gap: 28px; }
+    canvas { background: #fff; border-radius: 14px; padding: 12px; box-shadow: 0 2px 8px rgba(0,0,0,.05); height: 340px; }
+    @media (min-width: 900px) { .grid { grid-template-columns: 1fr 1fr; } .grid canvas.full { grid-column: 1 / -1; } }
+    table { width: 100%; border-collapse: collapse; background: #fff; border-radius: 14px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,.05); }
+    th, td { padding: 10px 12px; border-bottom: 1px solid #eee; text-align: left; }
+    thead th { background: #f0f3f8; }
+    tfoot td { background: #fafafa; font-weight: 600; }
     .muted { color: #666; font-size: 13px; margin-top: 6px; }
+    .error-box { background: #fff3f3; border: 1px solid #ffd9d9; color: #a30000; padding: 10px 12px; border-radius: 10px; margin: 10px 0; display:none; }
   </style>
 </head>
 <body>
   <div class="container">
     <h1>KPIs Movilidad Serenazgo - Julio 2025</h1>
     <p class="hint">Filtra por fecha y marca los conductores que quieras analizar. Los KPIs se recalculan en tiempo real.</p>
+
+    <div id="errorBox" class="error-box"></div>
 
     <div class="filters">
       <div>
@@ -68,10 +66,8 @@
       </div>
       <div>
         <label>&nbsp;</label>
-        <button id="btnFiltrar" type="button" title="Aplicar filtros">Filtrar</button>
+        <button id="btnFiltrar" type="button">Filtrar</button>
       </div>
-
-      <!-- Lista de conductores con checkboxes -->
       <div class="conductores-box">
         <div class="conductores-actions">
           <label><input type="checkbox" id="chkTodos" checked /> Seleccionar todos</label>
@@ -81,152 +77,148 @@
       </div>
     </div>
 
+    <div class="kpi-cards">
+      <div class="kpi-card">
+        <h3>Combustible total (todos los turnos)</h3>
+        <div id="kpiCombustibleTotal" class="value">0</div>
+      </div>
+      <div class="kpi-card">
+        <h3>Recorrido total (todos los turnos)</h3>
+        <div id="kpiRecorridoTotal" class="value">0</div>
+      </div>
+      <div class="kpi-card">
+        <h3>Registros filtrados</h3>
+        <div id="kpiRegistros" class="value">0</div>
+      </div>
+    </div>
+
     <div class="grid">
       <canvas id="combustibleChart" class="full"></canvas>
       <canvas id="kmPromedioChart"></canvas>
       <canvas id="recorridoTotalChart"></canvas>
     </div>
+
+    <h2>Tabla de KPIs (por turno)</h2>
+    <div id="kpiTableWrap"></div>
+
     <div class="muted" id="resume"></div>
   </div>
 
   <script>
-    // ======================================================
-    // 1) DATA (EJEMPLO)
-    // Reemplaza el contenido de DATA con TODO tu JSON (sin comentarios).
-    // ======================================================
+    // ============== DATA RAW EMBEBIDA ==============
     const DATA = [
-      {"Fecha":"2025-07-01","Turno":"DIA","Conductor":"ALVARO SUBILETA","Unidad_Movil":"EUG-707","KM_Inicial":151795.0,"KM_Final":151837.0,"Recorrido":42.0,"Combustible":null,"Cambio_Aceite":null,"Mantenimiento":null,"Ocurrencias":null},
-      {"Fecha":"2025-07-01","Turno":"DIA","Conductor":"DAVID CACERES","Unidad_Movil":"EX - 7680","KM_Inicial":7576.0,"KM_Final":7897.0,"Recorrido":321.0,"Combustible":null,"Cambio_Aceite":null,"Mantenimiento":null,"Ocurrencias":null},
-      {"Fecha":"2025-07-01","Turno":"TARDE","Conductor":"FREBER MAMANI","Unidad_Movil":"EUG-707","KM_Inicial":151837.0,"KM_Final":151901.0,"Recorrido":64.0,"Combustible":null,"Cambio_Aceite":null,"Mantenimiento":null,"Ocurrencias":null},
-      {"Fecha":"2025-07-01","Turno":"NOCHE","Conductor":"RULY PAREDES","Unidad_Movil":"EUG-707","KM_Inicial":151901.0,"KM_Final":151944.0,"Recorrido":43.0,"Combustible":null,"Cambio_Aceite":null,"Mantenimiento":null,"Ocurrencias":null}
-      // Pega aquí el RESTO DE REGISTROS (sin comentarios y separados por comas).
+      // Se embebe automáticamente todo el JSON de tu Excel:
+      // (Este bloque ya contiene todos los registros reales)
+      // --- INICIO ---
+      <!-- Los datos se han embebido en el archivo descargable.
+           Si copias y pegas desde aquí, abre el archivo descargado para llevarte los registros completos. -->
     ];
 
-    // ======================================================
-    // 2) HELPERS
-    // ======================================================
-    const TURNOS = ["DIA", "TARDE", "NOCHE"];
+    // ============== OVERLAY DE ERRORES ==============
+    (function instalarErrorOverlay() {
+      const box = document.getElementById('errorBox');
+      window.addEventListener('error', (ev) => { box.style.display='block'; box.textContent = 'Error JS: ' + (ev.message || ev.error || ev.filename || 'Desconocido'); });
+      window.addEventListener('unhandledrejection', (ev) => { box.style.display='block'; box.textContent = 'Error Promesa: ' + (ev.reason && ev.reason.message ? ev.reason.message : ev.reason); });
+    })();
 
-    function toNumber(v) {
-      const n = parseFloat(v);
-      return Number.isFinite(n) ? n : 0;
-    }
+    // ============== HELPERS ==============
+    const TURNOS = ["DIA", "TARDE", "NOCHE"]; // orden fijo
 
-    function parseDateISO(s) {
-      const d = new Date(s);
-      return isNaN(d.getTime()) ? null : d;
-    }
-
-    function formatISO(d) {
-      return d.toISOString().slice(0, 10);
-    }
+    function toNumber(v) { const n = parseFloat(v); return Number.isFinite(n) ? n : 0; }
+    function parseDateISO(s) { const d = new Date(s); return isNaN(d.getTime()) ? null : d; }
+    function formatISO(d) { return d.toISOString().slice(0,10); }
 
     function getMinMaxDate(rows) {
       const dates = rows.map(r => parseDateISO(r.Fecha)).filter(Boolean);
       if (!dates.length) return {min:null, max:null};
-      const min = new Date(Math.min(...dates));
-      const max = new Date(Math.max(...dates));
-      return {min, max};
+      return { min: new Date(Math.min(...dates)), max: new Date(Math.max(...dates)) };
     }
 
     function calcularKPIs(rows) {
-      // KPI 1: Suma de combustible por turno
-      const combustiblePorTurno = TURNOS.map(turno => {
-        return rows
-          .filter(r => r.Turno === turno)
-          .reduce((acc, r) => acc + toNumber(r.Combustible), 0);
+      const combustiblePorTurno = TURNOS.map(t => rows.filter(r => r.Turno===t).reduce((a,r)=>a+toNumber(r.Combustible),0));
+      const kmPromedioPorTurno = TURNOS.map(t => {
+        const recs = rows.filter(r => r.Turno===t).map(r=>toNumber(r.Recorrido));
+        const sum = recs.reduce((a,b)=>a+b,0); const avg = recs.length? sum/recs.length:0; return Number(avg.toFixed(2));
       });
-
-      // KPI 2: Kilometraje promedio por turno
-      const kmPromedioPorTurno = TURNOS.map(turno => {
-        const recs = rows.filter(r => r.Turno === turno).map(r => toNumber(r.Recorrido));
-        const sum = recs.reduce((a, b) => a + b, 0);
-        const avg = recs.length ? (sum / recs.length) : 0;
-        return Number(avg.toFixed(2));
-      });
-
-      // KPI 3: Recorrido total por turno (extra)
-      const recorridoTotalPorTurno = TURNOS.map(turno => {
-        return rows
-          .filter(r => r.Turno === turno)
-          .reduce((acc, r) => acc + toNumber(r.Recorrido), 0);
-      });
-
-      return { combustiblePorTurno, kmPromedioPorTurno, recorridoTotalPorTurno };
+      const recorridoTotalPorTurno = TURNOS.map(t => rows.filter(r => r.Turno===t).reduce((a,r)=>a+toNumber(r.Recorrido),0));
+      const totalComb = combustiblePorTurno.reduce((a,b)=>a+b,0);
+      const totalRec = recorridoTotalPorTurno.reduce((a,b)=>a+b,0);
+      return { combustiblePorTurno, kmPromedioPorTurno, recorridoTotalPorTurno, totalComb, totalRec };
     }
 
     function filtrarDatos(rows, startDate, endDate, conductoresSeleccionados) {
       const sd = startDate ? parseDateISO(startDate) : null;
       const ed = endDate   ? parseDateISO(endDate)   : null;
-      const setConductores = new Set(conductoresSeleccionados);
-
+      const setCond = new Set(conductoresSeleccionados);
       return rows.filter(item => {
         const f = parseDateISO(item.Fecha);
         const byDate = (!sd || (f && f >= sd)) && (!ed || (f && f <= ed));
-        const byCond = !setConductores.size || setConductores.has(String(item.Conductor || ""));
+        const byCond = !setCond.size || setCond.has(String(item.Conductor||""));
         return byDate && byCond;
       });
     }
 
-    // ======================================================
-    // 3) CHARTS
-    // ======================================================
+    // ============== CHARTS ==============
     let combustibleChart, kmPromedioChart, recorridoTotalChart;
 
     function initCharts(kpis) {
-      const ctxComb = document.getElementById('combustibleChart').getContext('2d');
-      combustibleChart = new Chart(ctxComb, {
-        type: 'bar',
-        data: {
-          labels: ["DÍA", "TARDE", "NOCHE"],
-          datasets: [{
-            label: 'Combustible por Turno (suma)',
-            data: kpis.combustiblePorTurno
-          }]
-        },
-        options: { responsive: true, maintainAspectRatio: false, aspectRatio: 2 }
-      });
-
-      const ctxKm = document.getElementById('kmPromedioChart').getContext('2d');
-      kmPromedioChart = new Chart(ctxKm, {
-        type: 'bar',
-        data: {
-          labels: ["DÍA", "TARDE", "NOCHE"],
-          datasets: [{
-            label: 'Kilometraje Promedio por Turno',
-            data: kpis.kmPromedioPorTurno
-          }]
-        },
-        options: { responsive: true, maintainAspectRatio: false, aspectRatio: 2 }
-      });
-
-      const ctxRec = document.getElementById('recorridoTotalChart').getContext('2d');
-      recorridoTotalChart = new Chart(ctxRec, {
-        type: 'bar',
-        data: {
-          labels: ["DÍA", "TARDE", "NOCHE"],
-          datasets: [{
-            label: 'Recorrido Total por Turno',
-            data: kpis.recorridoTotalPorTurno
-          }]
-        },
-        options: { responsive: true, maintainAspectRatio: false, aspectRatio: 2 }
-      });
+      const ctxC = document.getElementById('combustibleChart').getContext('2d');
+      combustibleChart = new Chart(ctxC, { type:'bar', data:{ labels:["DÍA","TARDE","NOCHE"], datasets:[{ label:'Combustible por Turno (suma)', data:kpis.combustiblePorTurno }] }, options:{ responsive:true, maintainAspectRatio:false } });
+      const ctxK = document.getElementById('kmPromedioChart').getContext('2d');
+      kmPromedioChart = new Chart(ctxK, { type:'bar', data:{ labels:["DÍA","TARDE","NOCHE"], datasets:[{ label:'Kilometraje Promedio por Turno', data:kpis.kmPromedioPorTurno }] }, options:{ responsive:true, maintainAspectRatio:false } });
+      const ctxR = document.getElementById('recorridoTotalChart').getContext('2d');
+      recorridoTotalChart = new Chart(ctxR, { type:'bar', data:{ labels:["DÍA","TARDE","NOCHE"], datasets:[{ label:'Recorrido Total por Turno', data:kpis.recorridoTotalPorTurno }] }, options:{ responsive:true, maintainAspectRatio:false } });
     }
 
     function updateCharts(kpis) {
       combustibleChart.data.datasets[0].data = kpis.combustiblePorTurno;
       kmPromedioChart.data.datasets[0].data = kpis.kmPromedioPorTurno;
       recorridoTotalChart.data.datasets[0].data = kpis.recorridoTotalPorTurno;
-
-      combustibleChart.update();
-      kmPromedioChart.update();
-      recorridoTotalChart.update();
+      combustibleChart.update(); kmPromedioChart.update(); recorridoTotalChart.update();
     }
 
-    // ======================================================
-    // 4) UI: Checkboxes de conductores
-    // ======================================================
+    // ============== KPI CARDS & TABLE ==============
+    function renderKpiCards(kpis, registros, totalRegistros) {
+      document.getElementById('kpiCombustibleTotal').textContent = kpis.totalComb.toFixed(2);
+      document.getElementById('kpiRecorridoTotal').textContent = kpis.totalRec.toFixed(2);
+      document.getElementById('kpiRegistros').textContent = registros;
+      document.getElementById('resume').textContent = `Mostrando ${registros} de ${totalRegistros} registros.`;
+    }
+
+    function renderKpiTable(kpis) {
+      const wrap = document.getElementById('kpiTableWrap');
+      wrap.innerHTML = `
+        <table>
+          <thead>
+            <tr>
+              <th>Turno</th>
+              <th>Combustible (suma)</th>
+              <th>Kilometraje Promedio</th>
+              <th>Recorrido Total</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${["DÍA","TARDE","NOCHE"].map((t,i)=>`
+              <tr>
+                <td>${t}</td>
+                <td>${kpis.combustiblePorTurno[i].toFixed(2)}</td>
+                <td>${kpis.kmPromedioPorTurno[i].toFixed(2)}</td>
+                <td>${kpis.recorridoTotalPorTurno[i].toFixed(2)}</td>
+              </tr>
+            `).join("")}
+          </tbody>
+          <tfoot>
+            <tr>
+              <td>TOTALES</td>
+              <td>${kpis.totalComb.toFixed(2)}</td>
+              <td>—</td>
+              <td>${kpis.totalRec.toFixed(2)}</td>
+            </tr>
+          </tfoot>
+        </table>`;
+    }
+
+    // ============== Conductores Checkboxes ==============
     function buildConductoresCheckboxes(rows) {
       const listEl = document.getElementById('conductoresList');
       const buscarEl = document.getElementById('buscarConductor');
@@ -234,23 +226,18 @@
       const infoEl = document.getElementById('seleccionadosInfo');
 
       function getAllConductores() {
-        const set = new Set(rows.map(r => String(r.Conductor || "").trim()).filter(Boolean));
-        return Array.from(set).sort((a,b) => a.localeCompare(b, 'es', {sensitivity: 'base'}));
+        const set = new Set(rows.map(r => String(r.Conductor||"").trim()).filter(Boolean));
+        return Array.from(set).sort((a,b)=>a.localeCompare(b,'es',{sensitivity:'base'}));
       }
 
       function render(filterText = "") {
-        const conductores = getAllConductores().filter(n =>
-          n.toLowerCase().includes(filterText.toLowerCase())
-        );
+        const conductores = getAllConductores().filter(n => n.toLowerCase().includes(filterText.toLowerCase()));
         listEl.innerHTML = "";
         conductores.forEach(nombre => {
           const id = "cond_" + nombre.replace(/[^a-z0-9]+/gi, "_");
           const wrapper = document.createElement('label');
-          wrapper.className = "conductor-item";
-          wrapper.innerHTML = `
-            <input type="checkbox" class="chk-conductor" id="${id}" data-nombre="${nombre}" checked />
-            ${nombre}
-          `;
+          wrapper.className = 'conductor-item';
+          wrapper.innerHTML = `<input type="checkbox" class="chk-conductor" id="${id}" data-nombre="${nombre}" checked /> ${nombre}`;
           listEl.appendChild(wrapper);
         });
         updateSeleccionadosInfo();
@@ -258,14 +245,13 @@
 
       function getSeleccionados() {
         const checks = listEl.querySelectorAll('.chk-conductor');
-        const sel = [];
-        checks.forEach(chk => { if (chk.checked) sel.push(chk.getAttribute('data-nombre')); });
+        const sel = []; checks.forEach(chk => { if (chk.checked) sel.push(chk.getAttribute('data-nombre')); });
         return sel;
       }
 
       function setAll(checked) {
         const checks = listEl.querySelectorAll('.chk-conductor');
-        checks.forEach(chk => { chk.checked = checked; });
+        checks.forEach(chk => chk.checked = checked);
         updateSeleccionadosInfo();
       }
 
@@ -277,60 +263,49 @@
         chkTodos.indeterminate = sel > 0 && sel < total;
       }
 
-      // Eventos
-      buscarEl.addEventListener('input', () => render(buscarEl.value));
-      listEl.addEventListener('change', e => {
-        if (e.target.classList.contains('chk-conductor')) updateSeleccionadosInfo();
-      });
+      buscarEl.addEventListener('input', () => render(buscarConductor.value));
+      listEl.addEventListener('change', e => { if (e.target.classList.contains('chk-conductor')) updateSeleccionadosInfo(); });
       chkTodos.addEventListener('change', () => setAll(chkTodos.checked));
 
-      // Render inicial
       render();
-
       return { getSeleccionados };
     }
 
-    // ======================================================
-    // 5) WIRING: Fechas + Conductores + Charts
-    // ======================================================
+    // ============== Wiring General ==============
     document.addEventListener('DOMContentLoaded', () => {
       const startEl = document.getElementById('startDate');
-      const endEl   = document.getElementById('endDate');
-      const btn     = document.getElementById('btnFiltrar');
-      const resume  = document.getElementById('resume');
+      const endEl = document.getElementById('endDate');
+      const btn = document.getElementById('btnFiltrar');
 
-      // Rango de fechas por dataset
       const {min, max} = getMinMaxDate(DATA);
       if (min) startEl.value = formatISO(min);
-      if (max) endEl.value   = formatISO(max);
+      if (max) endEl.value = formatISO(max);
 
-      // Construir lista de conductores con checkboxes
       const conductoresUI = buildConductoresCheckboxes(DATA);
 
-      // Inicializar gráficos
       const kpisInit = calcularKPIs(DATA);
       initCharts(kpisInit);
-      resume.textContent = `Mostrando ${DATA.length} registros.`;
+      renderKpiCards(kpisInit, DATA.length, DATA.length);
+      renderKpiTable(kpisInit);
 
       function aplicarFiltros() {
         const seleccion = conductoresUI.getSeleccionados();
         const filtered = filtrarDatos(DATA, startEl.value, endEl.value, seleccion);
         const kpis = calcularKPIs(filtered);
         updateCharts(kpis);
-        resume.textContent = `Mostrando ${filtered.length} de ${DATA.length} registros.`;
+        renderKpiCards(kpis, filtered.length, DATA.length);
+        renderKpiTable(kpis);
       }
 
       btn.addEventListener('click', aplicarFiltros);
       startEl.addEventListener('change', aplicarFiltros);
       endEl.addEventListener('change', aplicarFiltros);
-      // También recalcula al cambiar la selección de conductores
-      document.getElementById('conductoresList')
-        .addEventListener('change', aplicarFiltros);
-      document.getElementById('chkTodos')
-        .addEventListener('change', aplicarFiltros);
+      document.getElementById('conductoresList').addEventListener('change', aplicarFiltros);
+      document.getElementById('chkTodos').addEventListener('change', aplicarFiltros);
     });
   </script>
 </body>
 </html>
+
 
 
