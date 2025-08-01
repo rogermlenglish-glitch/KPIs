@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <title>KPIs Serenazgo - Gasolina (GL) con Validación ≤100 por día</title>
+  <title>KPIs Serenazgo - Gasolina (GL) | Filtros Conductores & Vehículos</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <!-- Tipografías -->
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=Poppins:wght@500;700&display=swap" rel="stylesheet">
@@ -96,21 +96,17 @@
     tfoot td{ font-weight:700; background: color-mix(in oklab, var(--bg-soft) 70%, var(--card) 30%); }
 
     .muted{ color:var(--muted); font-size:12px; margin-top:8px; }
-    .error{ display:none; margin:14px 0; padding:12px; border-radius:12px; background:#fee2e2; border:1px solid #fecaca; color:#991b1b; }
-    .badge{ display:inline-block; padding:2px 8px; border-radius:999px; background:var(--primary-50); color:var(--primary-600); font-size:11px; font-weight:700; margin-left:6px; }
   </style>
 </head>
 <body>
   <header class="hero">
     <div class="container">
-      <h1 class="title">KPIs Movilidad Serenazgo — Julio 2025 <span class="badge">Gasolina (GL)</span></h1>
-      <p class="subtitle">Filtra por fecha, conductores y vehículos. Validación automática: ningún día supera 100 GL.</p>
+      <h1 class="title">KPIs Movilidad Serenazgo — Julio 2025</h1>
+      <p class="subtitle">Filtra por fecha, conductores y vehículos. Los KPIs y gráficos se recalculan en tiempo real.</p>
     </div>
   </header>
 
   <main class="container" style="margin-top:20px;">
-    <div id="errorBox" class="error"></div>
-
     <!-- FILTROS -->
     <section class="filters">
       <div class="field">
@@ -130,7 +126,7 @@
         <button id="btnFiltrar" class="btn" type="button" title="Aplicar filtros">Aplicar filtros</button>
       </div>
 
-      <!-- Conductores -->
+      <!-- Conductores (todas las casillas) -->
       <div class="box card">
         <div class="box-header">
           <label class="check">
@@ -181,21 +177,21 @@
 
   <script>
     /* ====== DATA EMBEBIDA ======
-       👉 PEGA AQUÍ la data real del Excel “AC KM DE LAS MOVILES DE SERENAZGO JULIO 2025.xlsx”
-       Formato por registro:
+       👉 Reemplaza el arreglo DATA con TODA tu data real (del Excel actualizado).
+       Formato de cada registro:
        {
          "Fecha":"YYYY-MM-DD","Turno":"DIA|TARDE|NOCHE","Conductor":"...","Unidad_Movil":"EUG-707|EUG-717|EX-7680|EX-7664|...",
          "KM_Inicial":151795,"KM_Final":151837,"Recorrido":42,
-         "Combustible": 0..100, "Cambio_Aceite":null, "Mantenimiento":null, "Ocurrencias":null
+         "Combustible": <número en GL>, "Cambio_Aceite":..., "Mantenimiento":..., "Ocurrencias":...
        }
-       Regla validada: Combustible (GL) <= 100 por registro y suma diaria <= 100.
+       *Nota*: No hay restricción de 100 GL.
     */
     const DATA = [
-      /* ===== EJEMPLOS (BORRA Y PEGA TU DATA REAL) ===== */
-      {"Fecha":"2025-07-25","Turno":"TARDE","Conductor":"WILSON LUDEÑA","Unidad_Movil":"EUG-717","KM_Inicial":153606,"KM_Final":153666,"Recorrido":60,"Combustible":60,"Cambio_Aceite":null,"Mantenimiento":null,"Ocurrencias":null},
-      {"Fecha":"2025-07-27","Turno":"TARDE","Conductor":"WILSON LUDEÑA","Unidad_Movil":"EUG-717","KM_Inicial":154040,"KM_Final":154114,"Recorrido":74,"Combustible":55,"Cambio_Aceite":null,"Mantenimiento":null,"Ocurrencias":null},
-      {"Fecha":"2025-07-29","Turno":"DIA","Conductor":"RULY PAREDES","Unidad_Movil":"EUG-717","KM_Inicial":154380,"KM_Final":154452,"Recorrido":72,"Combustible":80,"Cambio_Aceite":null,"Mantenimiento":null,"Ocurrencias":null},
-      /* Más filas… */
+      /* ===== EJEMPLOS DE MUESTRA (BORRA Y PEGA TU DATA REAL COMPLETA) ===== */
+      {"Fecha":"2025-07-25","Turno":"TARDE","Conductor":"WILSON LUDEÑA","Unidad_Movil":"EUG-717","KM_Inicial":153606,"KM_Final":153666,"Recorrido":60,"Combustible":180,"Cambio_Aceite":null,"Mantenimiento":null,"Ocurrencias":null},
+      {"Fecha":"2025-07-27","Turno":"TARDE","Conductor":"WILSON LUDEÑA","Unidad_Movil":"EUG-717","KM_Inicial":154040,"KM_Final":154114,"Recorrido":74,"Combustible":170,"Cambio_Aceite":null,"Mantenimiento":null,"Ocurrencias":null},
+      {"Fecha":"2025-07-29","Turno":"DIA","Conductor":"RULY PAREDES","Unidad_Movil":"EUG-717","KM_Inicial":154380,"KM_Final":154452,"Recorrido":72,"Combustible":200,"Cambio_Aceite":null,"Mantenimiento":null,"Ocurrencias":null},
+      /* Pega aquí el resto de filas... */
     ];
 
     /* ====== Vehículos fijos (4 casillas) ====== */
@@ -206,19 +202,12 @@
       { id: 'EX-7664', tipo: 'Motocicleta' },
     ];
 
-    /* ===== Overlay errores ===== */
-    (function () {
-      const box = document.getElementById('errorBox');
-      window.addEventListener('error', ev => { box.style.display='block'; box.textContent = 'Error JS: '+(ev.message||ev.error||''); });
-      window.addEventListener('unhandledrejection', ev => { box.style.display='block'; box.textContent = 'Error Promesa: '+(ev.reason?.message || ev.reason || ''); });
-    })();
-
-    /* ===== Helpers & Validación ===== */
+    /* ===== Helpers ===== */
     const TURNOS = ["DIA","TARDE","NOCHE"];
+    const GL_TO_L = 3.785; // 1 GL ≈ 3.785 L
     const toNumber = v => Number.isFinite(+v) ? +v : 0;
     const parseDateISO = s => { const d = new Date(s); return isNaN(d.getTime()) ? null : d; };
     const formatISO = d => d.toISOString().slice(0,10);
-    const GL_TO_L = 3.785; // 1 galón ≈ 3.785 litros
 
     function canonicalUnidad(u){
       if(!u) return '';
@@ -237,27 +226,6 @@
       const dates = rows.map(r => parseDateISO(r.Fecha)).filter(Boolean);
       if(!dates.length) return {min:null, max:null};
       return { min:new Date(Math.min(...dates)), max:new Date(Math.max(...dates)) };
-    }
-
-    // Validación: cada registro <=100 GL, suma por fecha <=100 GL
-    function validateFuel(rows){
-      const errors = [];
-      const perDate = {};
-      rows.forEach(r=>{
-        const d = r.Fecha || '(sin fecha)';
-        const gl = toNumber(r.Combustible);
-        if (gl > 100){
-          errors.push(`Registro: ${d} — ${r.Unidad_Movil||''} — ${r.Conductor||''}: ${gl} GL > 100`);
-        }
-        if (!perDate[d]) perDate[d] = 0;
-        perDate[d] += gl;
-      });
-      Object.entries(perDate).forEach(([d,sum])=>{
-        if (sum > 100){
-          errors.push(`Suma diaria: ${d} = ${sum.toFixed(2)} GL (supera 100 GL)`);
-        }
-      });
-      return errors;
     }
 
     function calcularKPIs(rows){
@@ -465,18 +433,12 @@
       const uiConductores = buildConductores();
       const uiVehiculos   = buildVehiculos();
 
-      // Validación de datos (sobre toda la data)
-      const errorsAll = validateFuel(DATA);
-      const errorBox = document.getElementById('errorBox');
-      if (errorsAll.length){
-        errorBox.style.display='block';
-        errorBox.innerHTML = `<strong>⚠ Validación de gasolina (GL ≤ 100 / día):</strong><br>${errorsAll.map(e=>`• ${e}`).join('<br>')}`;
-      }
-
       const kpisInit=calcularKPIs(DATA);
       initCharts(kpisInit);
       renderKpiCards(kpisInit, DATA.length, DATA.length);
       renderKpiTable(kpisInit);
+
+      // Tabla completa SIEMPRE con TODO (no filtrada)
       renderRawTable(DATA);
 
       function aplicarFiltros(){
@@ -484,19 +446,12 @@
         const vehs  = uiVehiculos.getSeleccionados(); // IDs exactos
         const filtered = filtrarDatos(DATA, startEl.value, endEl.value, conds, vehs);
 
-        // Validación sobre subset filtrado (por si necesitas revisar una fecha específica tras filtrar)
-        const errors = validateFuel(filtered);
-        if (errors.length){
-          errorBox.style.display='block';
-          errorBox.innerHTML = `<strong>⚠ Validación de gasolina (GL ≤ 100 / día):</strong><br>${errors.map(e=>`• ${e}`).join('<br>')}`;
-        } else {
-          errorBox.style.display='none';
-        }
-
         const kpis = calcularKPIs(filtered);
         updateCharts(kpis);
         renderKpiCards(kpis, filtered.length, DATA.length);
         renderKpiTable(kpis);
+
+        // La tabla completa NO se altera (sigue mostrando todo el Excel)
       }
 
       btn.addEventListener('click', aplicarFiltros);
