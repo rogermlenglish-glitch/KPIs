@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>KPIs Serenazgo - Interactivo</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 40px; background-color: #f9f9f9; }
+        .container { width: 90%; max-width: 1200px; margin: auto; }
+        canvas { margin: 30px 0; }
+        h2 { color: #333; }
+        .filters { margin-bottom: 20px; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h2>KPIs Movilidad Serenazgo - Julio 2025</h2>
+
+    <div class="filters">
+        Desde: <input type="date" id="startDate"> 
+        Hasta: <input type="date" id="endDate">
+        Conductor: <input type="text" id="conductorFilter">
+        <button onclick="updateCharts()">Filtrar</button>
+    </div>
+
+    <canvas id="combustibleChart"></canvas>
+    <canvas id="kmPromedioChart"></canvas>
+</div>
+
+<script>
+const data = JSON.parse(`[
+  {"Fecha":"2025-07-01","Turno":"DIA","Conductor":"ALVARO SUBILETA","Unidad_Movil":"EUG-707","KM_Inicial":151795.0,"KM_Final":151837.0,"Recorrido":42.0,"Combustible":null,"Cambio_Aceite":null,"Mantenimiento":null,"Ocurrencias":null},
+  {"Fecha":"2025-07-01","Turno":"DIA","Conductor":"DAVID CACERES","Unidad_Movil":"EX - 7680","KM_Inicial":7576.0,"KM_Final":7897.0,"Recorrido":321.0,"Combustible":null,"Cambio_Aceite":null,"Mantenimiento":null,"Ocurrencias":null},
+  {"Fecha":"2025-07-01","Turno":"TARDE","Conductor":"FREBER MAMANI","Unidad_Movil":"EUG-707","KM_Inicial":151837.0,"KM_Final":151901.0,"Recorrido":64.0,"Combustible":null,"Cambio_Aceite":null,"Mantenimiento":null,"Ocurrencias":null},
+  {"Fecha":"2025-07-01","Turno":"NOCHE","Conductor":"RULY PAREDES","Unidad_Movil":"EUG-707","KM_Inicial":151901.0,"KM_Final":151944.0,"Recorrido":43.0,"Combustible":null,"Cambio_Aceite":null,"Mantenimiento":null,"Ocurrencias":null},
+  
+  // Copia aquí el resto del contenido del JSON que descargaste.
+]`);
+
+let combustibleChart, kmPromedioChart;
+
+function filtrarDatos(startDate, endDate, conductor) {
+    return data.filter(item => {
+        const fechaValida = (!startDate || new Date(item.Fecha) >= new Date(startDate)) &&
+                            (!endDate || new Date(item.Fecha) <= new Date(endDate));
+        const conductorValido = !conductor || item.Conductor.toLowerCase().includes(conductor.toLowerCase());
+        return fechaValida && conductorValido;
+    });
+}
+
+function calcularKPIs(datos) {
+    const turnos = ['DIA', 'TARDE', 'NOCHE'];
+    const combustible = turnos.map(turno => 
+        datos.filter(item => item.Turno === turno).reduce((acc, curr) => acc + (curr.Combustible || 0), 0));
+
+    const kmPromedio = turnos.map(turno => {
+        const recorridos = datos.filter(item => item.Turno === turno).map(item => item.Recorrido);
+        return (recorridos.reduce((acc, curr) => acc + curr, 0) / (recorridos.length || 1)).toFixed(2);
+    });
+
+    return { combustible, kmPromedio };
+}
+
+function inicializarGraficos(combustible, kmPromedio) {
+    combustibleChart = new Chart(document.getElementById('combustibleChart'), {
+        type: 'bar',
+        data: {
+            labels: ['DÍA', 'TARDE', 'NOCHE'],
+            datasets: [{
+                label: 'Combustible por Turno',
+                data: combustible,
+                backgroundColor: ['#4caf50', '#ff9800', '#2196f3']
+            }]
+        }
+    });
+
+    kmPromedioChart = new Chart(document.getElementById('kmPromedioChart'), {
+        type: 'bar',
+        data: {
+            labels: ['DÍA', 'TARDE', 'NOCHE'],
+            datasets: [{
+                label: 'Kilometraje Promedio por Turno',
+                data: kmPromedio,
+                backgroundColor: ['#9c27b0', '#3f51b5', '#e91e63']
+            }]
+        }
+    });
+}
+
+function updateCharts() {
+    const startDate = document.getElementById('startDate').value;
+    const endDate = document.getElementById('endDate').value;
+    const conductor = document.getElementById('conductorFilter').value;
+
+    const datosFiltrados = filtrarDatos(startDate, endDate, conductor);
+    const kpis = calcularKPIs(datosFiltrados);
+
+    combustibleChart.data.datasets[0].data = kpis.combustible;
+    kmPromedioChart.data.datasets[0].data = kpis.kmPromedio;
+
+    combustibleChart.update();
+    kmPromedioChart.update();
+}
+
+window.onload = () => {
+    const kpisIniciales = calcularKPIs(data);
+    inicializarGraficos(kpisIniciales.combustible, kpisIniciales.kmPromedio);
+};
+</script>
+</body>
+</html>
