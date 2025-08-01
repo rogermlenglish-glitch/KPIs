@@ -1,111 +1,244 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <title>KPIs Serenazgo - Interactivo</title>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <style>
-        body { font-family: Arial, sans-serif; margin: 40px; background-color: #f9f9f9; }
-        .container { width: 90%; max-width: 1200px; margin: auto; }
-        canvas { margin: 30px 0; }
-        h2 { color: #333; }
-        .filters { margin-bottom: 20px; }
-    </style>
+  <meta charset="UTF-8" />
+  <title>KPIs Serenazgo - Interactivo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    :root { --gap: 16px; }
+    body { font-family: Arial, sans-serif; margin: 40px; background: #f9f9f9; color: #222; }
+    .container { width: 95%; max-width: 1200px; margin: auto; }
+    h1 { margin: 0 0 8px; }
+    p.hint { margin: 0 0 24px; color: #555; }
+    .filters {
+      display: grid;
+      grid-template-columns: repeat(6, minmax(100px, 1fr));
+      gap: var(--gap);
+      align-items: end;
+      margin-bottom: 24px;
+    }
+    .filters label { display: block; font-size: 12px; color: #444; margin-bottom: 6px; }
+    .filters input[type="date"], .filters input[type="text"] {
+      width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 8px; background: #fff;
+    }
+    .filters button {
+      padding: 10px 14px; border: none; border-radius: 10px; cursor: pointer; background: #1f7aec; color: #fff;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 28px;
+    }
+    canvas { background: #fff; border-radius: 14px; padding: 12px; box-shadow: 0 2px 8px rgba(0,0,0,.05); }
+    @media (min-width: 900px) {
+      .grid { grid-template-columns: 1fr 1fr; }
+      .grid canvas.full { grid-column: 1 / -1; }
+    }
+    .muted { color: #666; font-size: 13px; margin-top: 6px; }
+  </style>
 </head>
 <body>
-<div class="container">
-    <h2>KPIs Movilidad Serenazgo - Julio 2025</h2>
+  <div class="container">
+    <h1>KPIs Movilidad Serenazgo - Julio 2025</h1>
+    <p class="hint">Filtra por fecha y conductor. Los KPIs se recalculan en tiempo real.</p>
 
     <div class="filters">
-        Desde: <input type="date" id="startDate"> 
-        Hasta: <input type="date" id="endDate">
-        Conductor: <input type="text" id="conductorFilter">
-        <button onclick="updateCharts()">Filtrar</button>
+      <div>
+        <label for="startDate">Desde</label>
+        <input type="date" id="startDate" />
+      </div>
+      <div>
+        <label for="endDate">Hasta</label>
+        <input type="date" id="endDate" />
+      </div>
+      <div style="grid-column: span 3;">
+        <label for="conductorFilter">Conductor (contiene)</label>
+        <input type="text" id="conductorFilter" placeholder="Ej.: FREBER, RULY, DAVID..." />
+      </div>
+      <div>
+        <button id="btnFiltrar" type="button">Filtrar</button>
+      </div>
     </div>
 
-    <canvas id="combustibleChart"></canvas>
-    <canvas id="kmPromedioChart"></canvas>
-</div>
+    <div class="grid">
+      <canvas id="combustibleChart" class="full"></canvas>
+      <canvas id="kmPromedioChart"></canvas>
+      <canvas id="recorridoTotalChart"></canvas>
+    </div>
+    <div class="muted" id="resume"></div>
+  </div>
 
-<script>
-const data = JSON.parse(`[
-  {"Fecha":"2025-07-01","Turno":"DIA","Conductor":"ALVARO SUBILETA","Unidad_Movil":"EUG-707","KM_Inicial":151795.0,"KM_Final":151837.0,"Recorrido":42.0,"Combustible":null,"Cambio_Aceite":null,"Mantenimiento":null,"Ocurrencias":null},
-  {"Fecha":"2025-07-01","Turno":"DIA","Conductor":"DAVID CACERES","Unidad_Movil":"EX - 7680","KM_Inicial":7576.0,"KM_Final":7897.0,"Recorrido":321.0,"Combustible":null,"Cambio_Aceite":null,"Mantenimiento":null,"Ocurrencias":null},
-  {"Fecha":"2025-07-01","Turno":"TARDE","Conductor":"FREBER MAMANI","Unidad_Movil":"EUG-707","KM_Inicial":151837.0,"KM_Final":151901.0,"Recorrido":64.0,"Combustible":null,"Cambio_Aceite":null,"Mantenimiento":null,"Ocurrencias":null},
-  {"Fecha":"2025-07-01","Turno":"NOCHE","Conductor":"RULY PAREDES","Unidad_Movil":"EUG-707","KM_Inicial":151901.0,"KM_Final":151944.0,"Recorrido":43.0,"Combustible":null,"Cambio_Aceite":null,"Mantenimiento":null,"Ocurrencias":null},
-  
-  // Copia aquí el resto del contenido del JSON que descargaste.
-]`);
+  <script>
+    // ===========================
+    // 1) DATA (EJEMPLO)
+    // Reemplaza el contenido de DATA con TODO tu JSON (sin comentarios).
+    // ===========================
+    const DATA = [
+      {"Fecha":"2025-07-01","Turno":"DIA","Conductor":"ALVARO SUBILETA","Unidad_Movil":"EUG-707","KM_Inicial":151795.0,"KM_Final":151837.0,"Recorrido":42.0,"Combustible":null,"Cambio_Aceite":null,"Mantenimiento":null,"Ocurrencias":null},
+      {"Fecha":"2025-07-01","Turno":"DIA","Conductor":"DAVID CACERES","Unidad_Movil":"EX - 7680","KM_Inicial":7576.0,"KM_Final":7897.0,"Recorrido":321.0,"Combustible":null,"Cambio_Aceite":null,"Mantenimiento":null,"Ocurrencias":null},
+      {"Fecha":"2025-07-01","Turno":"TARDE","Conductor":"FREBER MAMANI","Unidad_Movil":"EUG-707","KM_Inicial":151837.0,"KM_Final":151901.0,"Recorrido":64.0,"Combustible":null,"Cambio_Aceite":null,"Mantenimiento":null,"Ocurrencias":null},
+      {"Fecha":"2025-07-01","Turno":"NOCHE","Conductor":"RULY PAREDES","Unidad_Movil":"EUG-707","KM_Inicial":151901.0,"KM_Final":151944.0,"Recorrido":43.0,"Combustible":null,"Cambio_Aceite":null,"Mantenimiento":null,"Ocurrencias":null}
+      // Pega aquí el RESTO DE REGISTROS (sin comentarios y separados por comas).
+    ];
 
-let combustibleChart, kmPromedioChart;
+    // ===========================
+    // 2) HELPERS
+    // ===========================
+    const TURNOS = ["DIA", "TARDE", "NOCHE"];
 
-function filtrarDatos(startDate, endDate, conductor) {
-    return data.filter(item => {
-        const fechaValida = (!startDate || new Date(item.Fecha) >= new Date(startDate)) &&
-                            (!endDate || new Date(item.Fecha) <= new Date(endDate));
-        const conductorValido = !conductor || item.Conductor.toLowerCase().includes(conductor.toLowerCase());
-        return fechaValida && conductorValido;
-    });
-}
+    function toNumber(v) {
+      const n = parseFloat(v);
+      return Number.isFinite(n) ? n : 0;
+    }
 
-function calcularKPIs(datos) {
-    const turnos = ['DIA', 'TARDE', 'NOCHE'];
-    const combustible = turnos.map(turno => 
-        datos.filter(item => item.Turno === turno).reduce((acc, curr) => acc + (curr.Combustible || 0), 0));
+    function parseDateISO(s) {
+      // Asume formato "YYYY-MM-DD"
+      const d = new Date(s);
+      return isNaN(d.getTime()) ? null : d;
+    }
 
-    const kmPromedio = turnos.map(turno => {
-        const recorridos = datos.filter(item => item.Turno === turno).map(item => item.Recorrido);
-        return (recorridos.reduce((acc, curr) => acc + curr, 0) / (recorridos.length || 1)).toFixed(2);
-    });
+    function formatISO(d) {
+      return d.toISOString().slice(0, 10);
+    }
 
-    return { combustible, kmPromedio };
-}
+    function getMinMaxDate(rows) {
+      const dates = rows.map(r => parseDateISO(r.Fecha)).filter(Boolean);
+      if (!dates.length) return {min:null, max:null};
+      const min = new Date(Math.min(...dates));
+      const max = new Date(Math.max(...dates));
+      return {min, max};
+    }
 
-function inicializarGraficos(combustible, kmPromedio) {
-    combustibleChart = new Chart(document.getElementById('combustibleChart'), {
+    function filtrarDatos(rows, startDate, endDate, conductor) {
+      const sd = startDate ? parseDateISO(startDate) : null;
+      const ed = endDate   ? parseDateISO(endDate)   : null;
+      const cond = (conductor || "").trim().toLowerCase();
+
+      return rows.filter(item => {
+        const f = parseDateISO(item.Fecha);
+        const byDate = (!sd || (f && f >= sd)) && (!ed || (f && f <= ed));
+        const byCond = !cond || String(item.Conductor || "").toLowerCase().includes(cond);
+        return byDate && byCond;
+      });
+    }
+
+    function calcularKPIs(rows) {
+      // KPI 1: Suma de combustible por turno
+      const combustiblePorTurno = TURNOS.map(turno => {
+        return rows
+          .filter(r => r.Turno === turno)
+          .reduce((acc, r) => acc + (toNumber(r.Combustible) ?? 0), 0);
+      });
+
+      // KPI 2: Kilometraje promedio por turno
+      const kmPromedioPorTurno = TURNOS.map(turno => {
+        const recs = rows.filter(r => r.Turno === turno).map(r => toNumber(r.Recorrido));
+        const sum = recs.reduce((a, b) => a + b, 0);
+        const avg = recs.length ? (sum / recs.length) : 0;
+        return Number(avg.toFixed(2));
+      });
+
+      // KPI 3: Recorrido total por turno (extra)
+      const recorridoTotalPorTurno = TURNOS.map(turno => {
+        return rows
+          .filter(r => r.Turno === turno)
+          .reduce((acc, r) => acc + toNumber(r.Recorrido), 0);
+      });
+
+      return { combustiblePorTurno, kmPromedioPorTurno, recorridoTotalPorTurno };
+    }
+
+    // ===========================
+    // 3) CHARTS
+    // ===========================
+    let combustibleChart, kmPromedioChart, recorridoTotalChart;
+
+    function initCharts(kpis) {
+      const ctxComb = document.getElementById('combustibleChart').getContext('2d');
+      combustibleChart = new Chart(ctxComb, {
         type: 'bar',
         data: {
-            labels: ['DÍA', 'TARDE', 'NOCHE'],
-            datasets: [{
-                label: 'Combustible por Turno',
-                data: combustible,
-                backgroundColor: ['#4caf50', '#ff9800', '#2196f3']
-            }]
-        }
-    });
+          labels: ["DÍA", "TARDE", "NOCHE"],
+          datasets: [{
+            label: 'Combustible por Turno (suma)',
+            data: kpis.combustiblePorTurno
+          }]
+        },
+        options: { responsive: true, maintainAspectRatio: false, aspectRatio: 2 }
+      });
 
-    kmPromedioChart = new Chart(document.getElementById('kmPromedioChart'), {
+      const ctxKm = document.getElementById('kmPromedioChart').getContext('2d');
+      kmPromedioChart = new Chart(ctxKm, {
         type: 'bar',
         data: {
-            labels: ['DÍA', 'TARDE', 'NOCHE'],
-            datasets: [{
-                label: 'Kilometraje Promedio por Turno',
-                data: kmPromedio,
-                backgroundColor: ['#9c27b0', '#3f51b5', '#e91e63']
-            }]
-        }
+          labels: ["DÍA", "TARDE", "NOCHE"],
+          datasets: [{
+            label: 'Kilometraje Promedio por Turno',
+            data: kpis.kmPromedioPorTurno
+          }]
+        },
+        options: { responsive: true, maintainAspectRatio: false, aspectRatio: 2 }
+      });
+
+      const ctxRec = document.getElementById('recorridoTotalChart').getContext('2d');
+      recorridoTotalChart = new Chart(ctxRec, {
+        type: 'bar',
+        data: {
+          labels: ["DÍA", "TARDE", "NOCHE"],
+          datasets: [{
+            label: 'Recorrido Total por Turno',
+            data: kpis.recorridoTotalPorTurno
+          }]
+        },
+        options: { responsive: true, maintainAspectRatio: false, aspectRatio: 2 }
+      });
+    }
+
+    function updateCharts(kpis) {
+      combustibleChart.data.datasets[0].data = kpis.combustiblePorTurno;
+      kmPromedioChart.data.datasets[0].data = kpis.kmPromedioPorTurno;
+      recorridoTotalChart.data.datasets[0].data = kpis.recorridoTotalPorTurno;
+
+      combustibleChart.update();
+      kmPromedioChart.update();
+      recorridoTotalChart.update();
+    }
+
+    // ===========================
+    // 4) UI WIRING
+    // ===========================
+    document.addEventListener('DOMContentLoaded', () => {
+      const startEl = document.getElementById('startDate');
+      const endEl   = document.getElementById('endDate');
+      const condEl  = document.getElementById('conductorFilter');
+      const btn     = document.getElementById('btnFiltrar');
+      const resume  = document.getElementById('resume');
+
+      // Setear rangos de fechas a partir del dataset
+      const {min, max} = getMinMaxDate(DATA);
+      if (min) startEl.value = formatISO(min);
+      if (max) endEl.value   = formatISO(max);
+
+      // Inicializar gráficos
+      const kpisInit = calcularKPIs(DATA);
+      initCharts(kpisInit);
+      resume.textContent = `Mostrando ${DATA.length} registros.`;
+
+      function aplicarFiltros() {
+        const filtered = filtrarDatos(DATA, startEl.value, endEl.value, condEl.value);
+        const kpis = calcularKPIs(filtered);
+        updateCharts(kpis);
+        resume.textContent = `Mostrando ${filtered.length} de ${DATA.length} registros.`;
+      }
+
+      // Botón y eventos extra
+      btn.addEventListener('click', aplicarFiltros);
+      startEl.addEventListener('change', aplicarFiltros);
+      endEl.addEventListener('change', aplicarFiltros);
+      condEl.addEventListener('keyup', (e) => { if (e.key === 'Enter') aplicarFiltros(); });
     });
-}
-
-function updateCharts() {
-    const startDate = document.getElementById('startDate').value;
-    const endDate = document.getElementById('endDate').value;
-    const conductor = document.getElementById('conductorFilter').value;
-
-    const datosFiltrados = filtrarDatos(startDate, endDate, conductor);
-    const kpis = calcularKPIs(datosFiltrados);
-
-    combustibleChart.data.datasets[0].data = kpis.combustible;
-    kmPromedioChart.data.datasets[0].data = kpis.kmPromedio;
-
-    combustibleChart.update();
-    kmPromedioChart.update();
-}
-
-window.onload = () => {
-    const kpisIniciales = calcularKPIs(data);
-    inicializarGraficos(kpisIniciales.combustible, kpisIniciales.kmPromedio);
-};
-</script>
+  </script>
 </body>
 </html>
+
