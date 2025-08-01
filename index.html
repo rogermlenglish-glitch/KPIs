@@ -3,120 +3,30 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>KPIs Moviles Serenazgo - Julio 2025</title>
-  <!-- Tailwind CDN -->
+  <title>KPIs Moviles Serenazgo</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <!-- Fuentes -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <!-- SheetJS (XLSX) -->
-  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
-  <!-- Chart.js -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
   <style>
-    :root {
-      --bg: #0b1221;
-      --card: #101a33;
-      --card2: #0f1730;
-      --muted: #8da2c0;
-      --primary: #4f8cff;
-      --accent: #22d3ee;
-      --text: #e6eefc;
-      --badges: #1f2b4a;
-    }
-    html, body {
-      background: linear-gradient(180deg, #0a1020 0%, #0b1221 100%);
-      color: var(--text);
-      font-family: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-    }
-    .glass {
-      background: linear-gradient(180deg, var(--card) 0%, var(--card2) 100%);
-      border: 1px solid rgba(255,255,255,0.06);
-      border-radius: 18px;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.04);
-    }
-    .kpi {
-      background: linear-gradient(180deg, #0f1834 0%, #0c152e 100%);
-      border: 1px solid rgba(255,255,255,0.06);
-      border-radius: 16px;
-      padding: 16px;
-    }
-    .chip {
-      background: var(--badges);
-      color: var(--text);
-      border: 1px solid rgba(255,255,255,0.08);
-      padding: 4px 10px;
-      border-radius: 9999px;
-      font-size: 12px;
-      white-space: nowrap;
-    }
-    .btn {
-      background: var(--primary);
-      color: white;
-      border-radius: 12px;
-      padding: 10px 14px;
-      font-weight: 600;
-      transition: transform .05s ease;
-    }
-    .btn:active { transform: translateY(1px); }
-    .btn-secondary {
-      background: #182241;
-    }
-    table {
-      border-collapse: separate;
-      border-spacing: 0;
-      width: 100%;
-    }
-    thead th {
-      position: sticky; top: 0;
-      background: #0e1832;
-      z-index: 1;
-    }
-    th, td {
-      padding: 10px 12px;
-      border-bottom: 1px solid rgba(255,255,255,0.06);
-      font-size: 14px;
-    }
-    tr:hover td {
-      background: rgba(255,255,255,0.02);
-    }
-    .scroll-shadow {
-      mask-image: linear-gradient(to bottom, transparent 0, black 28px, black calc(100% - 28px), transparent 100%);
-      -webkit-mask-image: linear-gradient(to bottom, transparent 0, black 28px, black calc(100% - 28px), transparent 100%);
-    }
-    .card-title {
-      font-weight: 700;
-      letter-spacing: .3px;
-    }
-    .subtle {
-      color: var(--muted);
-    }
-    .input {
-      background: #121b36;
-      border: 1px solid rgba(255,255,255,0.06);
-      border-radius: 12px;
-      color: var(--text);
-      padding: 10px 12px;
-      outline: none;
-      width: 100%;
-    }
-    .checklist {
-      max-height: 220px;
-      overflow: auto;
-      border: 1px solid rgba(255,255,255,0.06);
-      border-radius: 12px;
-      padding: 8px;
-      background: #0f1730;
-    }
-    .grid-auto {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-      gap: 14px;
-    }
-    .section-title {
-      font-weight: 800;
-      font-size: 18px;
-    }
+    :root { --bg:#0b1221; --card:#101a33; --card2:#0f1730; --muted:#8da2c0; --primary:#4f8cff; --accent:#22d3ee; --text:#e6eefc; --badges:#1f2b4a; }
+    html, body { background: linear-gradient(180deg, #0a1020 0%, #0b1221 100%); color: var(--text); font-family:'Inter', system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; }
+    .glass { background: linear-gradient(180deg, var(--card) 0%, var(--card2) 100%); border:1px solid rgba(255,255,255,0.06); border-radius:18px; box-shadow:0 10px 30px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.04); }
+    .kpi { background: linear-gradient(180deg, #0f1834 0%, #0c152e 100%); border:1px solid rgba(255,255,255,0.06); border-radius:16px; padding:16px; }
+    .chip { background:var(--badges); color:var(--text); border:1px solid rgba(255,255,255,0.08); padding:4px 10px; border-radius:9999px; font-size:12px; white-space:nowrap; }
+    .btn { background:var(--primary); color:white; border-radius:12px; padding:10px 14px; font-weight:600; transition:transform .05s ease; }
+    .btn:active{ transform:translateY(1px); } .btn-secondary{ background:#182241; }
+    table{ border-collapse:separate; border-spacing:0; width:100%; } thead th{ position:sticky; top:0; background:#0e1832; z-index:1; }
+    th,td{ padding:10px 12px; border-bottom:1px solid rgba(255,255,255,0.06); font-size:14px; } tr:hover td{ background:rgba(255,255,255,0.02); }
+    .scroll-shadow{ mask-image:linear-gradient(to bottom, transparent 0, black 28px, black calc(100% - 28px), transparent 100%); -webkit-mask-image:linear-gradient(to bottom, transparent 0, black 28px, black calc(100% - 28px), transparent 100%); }
+    .card-title{ font-weight:700; letter-spacing:.3px; } .subtle{ color:var(--muted); }
+    .input{ background:#121b36; border:1px solid rgba(255,255,255,0.06); border-radius:12px; color:var(--text); padding:10px 12px; outline:none; width:100%; }
+    .checklist{ max-height:240px; overflow:auto; border:1px solid rgba(255,255,255,0.06); border-radius:12px; padding:8px; background:#0f1730; }
+    .grid-auto{ display:grid; grid-template-columns:repeat(auto-fit, minmax(220px, 1fr)); gap:14px; }
+    .section-title{ font-weight:800; font-size:18px; } .chart-wrap{ width:100%; }
+    @media (min-width: 1024px){ #kmChart{ height:420px !important; } #galChart{ height:420px !important; } }
+    @media (max-width: 1023px){ #kmChart{ height:280px !important; } #galChart{ height:280px !important; } }
+    .badge-type{ font-size:11px; padding:2px 8px; border-radius:999px; border:1px solid rgba(255,255,255,0.12); background:rgba(255,255,255,0.06); }
   </style>
 </head>
 <body>
@@ -124,32 +34,25 @@
     <div class="flex items-center justify-between gap-4">
       <div>
         <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight">KPIs de Movilidad – Serenazgo</h1>
-        <p class="subtle mt-1">Filtros por fecha, conductores y vehículos (Camionetas & Motocicletas). Vista para PC y móviles.</p>
+        <p class="subtle mt-1">Filtros por fecha, conductores y vehículos; gráficos optimizados para PC y móviles.</p>
       </div>
       <div class="flex items-center gap-2">
-        <label class="btn btn-secondary cursor-pointer">
-          <input id="fileInput" type="file" accept=".xlsx,.xls" class="hidden" />
-          Cargar Excel
-        </label>
-        <button id="reloadBtn" class="btn btn-secondary">Intentar cargar <span class="font-bold">data.xlsx</span></button>
         <button id="resetBtn" class="btn">Limpiar filtros</button>
       </div>
     </div>
   </header>
 
   <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-24">
-    <!-- Filtros -->
     <section class="glass p-4 sm:p-6">
       <div class="flex items-center justify-between flex-wrap gap-2">
         <div class="flex items-center gap-2">
           <span class="chip">EUG 707, EUG 717 → Camionetas</span>
           <span class="chip">EX 7680, EX 7664 → Motocicletas</span>
         </div>
-        <div class="subtle text-sm">Puedes subir tu archivo o coloca <b>data.xlsx</b> junto a este HTML</div>
+        <div class="subtle text-sm">Datos integrados (desde tu Excel).</div>
       </div>
 
       <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 mt-4">
-        <!-- Fechas -->
         <div class="lg:col-span-3 glass p-4">
           <div class="section-title mb-3">Fecha</div>
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -164,7 +67,6 @@
           </div>
         </div>
 
-        <!-- Conductores -->
         <div class="lg:col-span-4 glass p-4">
           <div class="flex items-center justify-between">
             <div class="section-title mb-3">Conductores</div>
@@ -176,7 +78,6 @@
           <div id="driversList" class="checklist grid-auto"></div>
         </div>
 
-        <!-- Vehículos -->
         <div class="lg:col-span-5 glass p-4">
           <div class="flex items-center justify-between">
             <div class="section-title mb-3">Vehículos</div>
@@ -186,7 +87,6 @@
             </div>
           </div>
 
-          <!-- Grupos -->
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
             <label class="flex items-center gap-2">
               <input id="grpCam" type="checkbox" class="accent-sky-400" checked>
@@ -203,7 +103,6 @@
       </div>
     </section>
 
-    <!-- KPIs -->
     <section class="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-6">
       <div class="kpi">
         <div class="subtle text-sm">Galones totales</div>
@@ -222,19 +121,17 @@
       </div>
     </section>
 
-    <!-- Charts -->
     <section class="grid grid-cols-1 lg:grid-cols-2 gap-4 mt-6">
-      <div class="glass p-4">
+      <div class="glass p-4 chart-wrap">
         <div class="card-title mb-2">Kilómetros por vehículo</div>
-        <canvas id="kmChart" height="220"></canvas>
+        <canvas id="kmChart"></canvas>
       </div>
-      <div class="glass p-4">
+      <div class="glass p-4 chart-wrap">
         <div class="card-title mb-2">Galones por vehículo</div>
-        <canvas id="galChart" height="220"></canvas>
+        <canvas id="galChart"></canvas>
       </div>
     </section>
 
-    <!-- Tabla -->
     <section class="glass p-4 sm:p-6 mt-6">
       <div class="flex items-center justify-between gap-2 flex-wrap">
         <div class="card-title">Tabla de datos (según filtros)</div>
@@ -252,396 +149,155 @@
     </section>
   </main>
 
+  <!-- Datos integrados desde tu Excel -->
+  <script id="embedded-data" type="application/json">
+[["FECHA","TURNO","CONDUCTOR","UNIDAD MOVIL","KM INICIAL","KM FINAL","RECORRIDO","GALONES DE COMBUSTIBLE","CAMBIO DE ACEITE","MANTENIMIENTO","OCURRENCIAS"],["2025-07-01","DIA","ALVARO SUBILETA","EUG-707","151 795","151837","42 KM","","","",""],["2025-07-01","DIA","DAVID CACERES","EX - 7680","7576","7897","321 KM","","","",""],["2025-07-01","TARDE","FREBER MAMANI","EUG-707","151 837","151 901","64 KM","","","",""],["2025-07-01","NOCHE","RULY PAREDES","EUG-707","151 901","151 944","43 KM","","","",""],["2025-07-02","DIA","GONZALO RAMIREZ","EUG-707","151 944","151 995","51 KM","","","",""],["2025-07-02","DIA","DAVID CACERES","EX - 7680","7897","8007","110 KM","","","",""],["2025-07-02","TARDE","GONZALO RAMIREZ","EUG-707","151 995","152 048","53 KM","","","",""],["2025-07-02","NOCHE","RULY PAREDES","EUG-707","152 048","152 095","47 KM","","","",""],["2025-07-03","DIA","ALVARO SUBILETA","EUG-707","152 095","152 156","61 KM","","","",""],["2025-07-03","TARDE","FREBER MAMANI","EUG-707","152 156","152 219","63 KM","","","",""],["2025-07-03","NOCHE","RULY PAREDES","EUG-707","152 219","152 257","38 KM","","","",""],["2025-07-03","DIA","DAVID CACERES","EX - 7680","8007","8218","211 KM","","","",""],["2025-07-04","DIA","ALVARO SUBILETA","EUG-707","152 257","152 317","60 KM","","","",""],["2025-07-04","TARDE","FREBER MAMANI","EUG-707","152 317","152 376","59 KM","","","",""],["2025-07-04","NOCHE","RULY PAREDES","EUG-707","152 376","152 420","44 KM","","","",""],["2025-07-04","DIA","DAVID CACERES","EX - 7680","8218","8461","243 KM","","","",""],["2025-07-05","DIA","ALVARO SUBILETA","EUG-707","152 420","152 479","59 KM","","","",""],["2025-07-05","TARDE","FREBER MAMANI","EUG-707","152 479","152 543","64 KM","","","",""],["2025-07-05","NOCHE","RULY PAREDES","EUG-707","152 543","152 596","53 KM","","","",""],["2025-07-06","DIA","DAVID CACERES","EX - 7680","8461","8653","192 KM","","","",""],["2025-07-06","DIA","ALVARO SUBILETA","EUG-707","152 596","152 666","70 KM","","","",""],["2025-07-06","TARDE","FREBER MAMANI","EUG-707","152 666","152 702","36 KM","","","",""],["2025-07-06","NOCHE","RULY PAREDES","EUG-707","152 702","152 739","37 KM","","","",""],["2025-07-07","DIA","ALVARO SUBILETA","EUG-707","152 739","152 792","53 KM","","","",""],["2025-07-07","TARDE","FREBER MAMANI","EUG-707","152 792","152 845","53 KM","","","",""],["2025-07-07","NOCHE","RULY PAREDES","EUG-707","152 845","152 890","45 KM","","","",""],["2025-07-07","DIA","DAVID CACERES","EX - 7680","8653","8914","261 KM","","","",""],["2025-07-08","DIA","ALVARO SUBILETA","EUG-707","152 890","152 949","59 KM","","","",""],["2025-07-08","TARDE","FREBER MAMANI","EUG-707","152 949","153 010","61 KM","","","",""],["2025-07-08","NOCHE","RULY PAREDES","EUG-707","153 010","153 049","39 KM","","","",""],["2025-07-09","DIA","ALVARO SUBILETA","EUG-707","153 049","153 110","61 KM","","","",""],["2025-07-09","TARDE","FREBER MAMANI","EUG-707","153 110","153 172","62 KM","","","",""],["2025-07-09","NOCHE","RULY PAREDES","EUG-707","153 172","153 207","35 KM","","","",""],["2025-07-10","DIA","ALVARO SUBILETA","EUG-707","153 207","153 268","61 KM","","","",""],["2025-07-10","TARDE","FREBER MAMANI","EUG-707","153 268","153 327","59 KM","","","",""],["2025-07-10","NOCHE","RULY PAREDES","EUG-707","153 327","153 371","44 KM","","","",""],["2025-07-11","DIA","ALVARO SUBILETA","EUG-707","153 371","153 424","53 KM","","","",""],["2025-07-11","TARDE","FREBER MAMANI","EUG-707","153 424","153 478","54 KM","","","",""],["2025-07-11","NOCHE","RULY PAREDES","EUG-707","153 478","153 525","47 KM","","","",""],["2025-07-12","DIA","ALVARO SUBILETA","EUG-707","153 525","153 581","56 KM","","","",""],["2025-07-12","TARDE","FREBER MAMANI","EUG-707","153 581","153 634","53 KM","","","",""],["2025-07-12","NOCHE","RULY PAREDES","EUG-707","153 634","153 675","41 KM","","","",""],["2025-07-13","DIA","ALVARO SUBILETA","EUG-707","153 675","153 730","55 KM","","","",""],["2025-07-13","TARDE","FREBER MAMANI","EUG-707","153 730","153 790","60 KM","","","",""],["2025-07-13","NOCHE","RULY PAREDES","EUG-707","153 790","153 834","44 KM","","","",""],["2025-07-14","DIA","ALVARO SUBILETA","EUG-707","153 834","153 885","51 KM","","","",""],["2025-07-14","TARDE","FREBER MAMANI","EUG-707","153 885","153 941","56 KM","","","",""],["2025-07-14","NOCHE","RULY PAREDES","EUG-707","153 941","153 985","44 KM","","","",""],["2025-07-15","DIA","ALVARO SUBILETA","EUG-707","153 985","154 037","52 KM","","","",""],["2025-07-15","TARDE","FREBER MAMANI","EUG-707","154 037","154 095","58 KM","","","",""],["2025-07-15","NOCHE","RULY PAREDES","EUG-707","154 095","154 134","39 KM","","","",""],["2025-07-16","DIA","ALVARO SUBILETA","EUG-707","154 134","154 186","52 KM","","","",""],["2025-07-16","TARDE","FREBER MAMANI","EUG-707","154 186","154 241","55 KM","","","",""],["2025-07-16","NOCHE","RULY PAREDES","EUG-707","154 241","154 286","45 KM","","","",""],["2025-07-17","DIA","ALVARO SUBILETA","EUG-707","154 286","154 336","50 KM","","","",""],["2025-07-17","TARDE","FREBER MAMANI","EUG-707","154 336","154 393","57 KM","","","",""],["2025-07-17","NOCHE","RULY PAREDES","EUG-707","154 393","154 439","46 KM","","","",""],["2025-07-18","DIA","ALVARO SUBILETA","EUG-707","154 439","154 493","54 KM","","","",""],["2025-07-18","TARDE","FREBER MAMANI","EUG-707","154 493","154 544","51 KM","","","",""],["2025-07-18","NOCHE","RULY PAREDES","EUG-707","154 544","154 586","42 KM","","","",""],["2025-07-19","DIA","ALVARO SUBILETA","EUG-707","154 586","154 638","52 KM","","","",""],["2025-07-19","TARDE","FREBER MAMANI","EUG-707","154 638","154 695","57 KM","","","",""],["2025-07-19","NOCHE","RULY PAREDES","EUG-707","154 695","154 739","44 KM","","","",""],["2025-07-20","DIA","ALVARO SUBILETA","EUG-707","154 739","154 792","53 KM","","","",""],["2025-07-20","TARDE","FREBER MAMANI","EUG-707","154 792","154 846","54 KM","","","",""],["2025-07-20","NOCHE","RULY PAREDES","EUG-707","154 846","154 890","44 KM","","","",""],["2025-07-21","DIA","ALVARO SUBILETA","EUG-707","154 890","154 942","52 KM","","","",""],["2025-07-21","TARDE","FREBER MAMANI","EUG-707","154 942","155 002","60 KM","","","",""],["2025-07-21","NOCHE","RULY PAREDES","EUG-707","155 002","155 047","45 KM","","","",""],["2025-07-22","DIA","ALVARO SUBILETA","EUG-707","155 047","155 097","50 KM","","","",""],["2025-07-22","TARDE","FREBER MAMANI","EUG-707","155 097","155 157","60 KM","","","",""],["2025-07-22","NOCHE","RULY PAREDES","EUG-707","155 157","155 201","44 KM","","","",""],["2025-07-23","DIA","ALVARO SUBILETA","EUG-707","155 201","155 252","51 KM","","","",""],["2025-07-23","TARDE","FREBER MAMANI","EUG-707","155 252","155 309","57 KM","","","",""],["2025-07-23","NOCHE","RULY PAREDES","EUG-707","155 309","155 352","43 KM","","","",""],["2025-07-24","DIA","ALVARO SUBILETA","EUG-707","155 352","155 405","53 KM","","","",""],["2025-07-24","TARDE","FREBER MAMANI","EUG-707","155 405","155 464","59 KM","","","",""],["2025-07-24","NOCHE","RULY PAREDES","EUG-707","155 464","155 507","43 KM","","","",""],["2025-07-25","DIA","ALVARO SUBILETA","EUG-707","155 507","155 562","55 KM","","","",""],["2025-07-25","TARDE","FREBER MAMANI","EUG-707","155 562","155 618","56 KM","","","",""],["2025-07-25","NOCHE","RULY PAREDES","EUG-707","155 618","155 662","44 KM","","","",""],["2025-07-26","DIA","ALVARO SUBILETA","EUG-707","155 662","155 714","52 KM","","","",""],["2025-07-26","TARDE","FREBER MAMANI","EUG-707","155 714","155 769","55 KM","","","",""],["2025-07-26","NOCHE","RULY PAREDES","EUG-707","155 769","155 813","44 KM","","","",""],["2025-07-27","DIA","ALVARO SUBILETA","EUG-707","155 813","155 865","52 KM","","","",""],["2025-07-27","TARDE","FREBER MAMANI","EUG-707","155 865","155 921","56 KM","","","",""],["2025-07-27","NOCHE","RULY PAREDES","EUG-707","155 921","155 965","44 KM","","","",""],["2025-07-28","DIA","ALVARO SUBILETA","EUG-707","155 965","156 019","54 KM","","","",""],["2025-07-28","TARDE","FREBER MAMANI","EUG-707","156 019","156 079","60 KM","","","",""],["2025-07-28","NOCHE","RULY PAREDES","EUG-707","156 079","156 124","45 KM","","","",""],["2025-07-29","DIA","ALVARO SUBILETA","EUG-707","156 124","156 176","52 KM","","","",""],["2025-07-29","TARDE","FREBER MAMANI","EUG-707","156 176","156 232","56 KM","","","",""],["2025-07-29","NOCHE","RULY PAREDES","EUG-707","156 232","156 276","44 KM","","","",""],["2025-07-30","DIA","ALVARO SUBILETA","EUG-707","156 276","156 325","49 KM","","","",""],["2025-07-30","TARDE","FREBER MAMANI","EUG-707","156 325","156 384","59 KM","","","",""],["2025-07-30","NOCHE","RULY PAREDES","EUG-707","156 384","156 431","47 KM","","","",""],["2025-07-31","DIA","ALVARO SUBILETA","EUG-707","156 431","156 481","50 KM","","","",""],["2025-07-31","TARDE","FREBER MAMANI","EUG-707","156 481","156 537","56 KM","","","",""],["2025-07-31","NOCHE","RULY PAREDES","EUG-707","156 537","156 580","43 KM","","","",""],["2025-07-31","","","EUG-717","","","","","","",""]]
+  </script>
+
   <script>
-    // === Configuración de tipos para las placas mencionadas ===
-    const VEHICLE_TYPES = {
-      "EUG 707": "Camioneta",
-      "EUG 717": "Camioneta",
-      "EX 7680": "Motocicleta",
-      "EX 7664": "Motocicleta",
-    };
-
-    // === Estado global ===
-    let rawRows = [];        // registros originales
-    let headers = [];        // nombres de columnas
-    let colIdx = {};         // índice de columnas detectadas
-    let filtered = [];       // registros después de filtros
-    let kmChart, galChart;   // referencias Chart.js
-
-    // === Utilidades ===
+    const VEHICLE_TYPES = { "EUG707":"Camioneta","EUG717":"Camioneta","EX7680":"Motocicleta","EX7664":"Motocicleta" };
+    const displayPlate = (raw) => (raw||"").toString().toUpperCase().trim().replace(/\s*-\s*/g,"-").replace(/\s+/g," ");
+    const keyPlate = (raw) => displayPlate(raw).replace(/[\s-]/g,"");
     const norm = (s) => (s ?? "").toString().trim();
-    const parseNum = (v) => {
-      if (v === null || v === undefined) return NaN;
-      // reemplazar coma decimal por punto
-      const s = norm(v).replace(/\./g, "").replace(",", ".");
-      const n = parseFloat(s);
-      return isNaN(n) ? parseFloat(norm(v)) : n;
-    };
-    const parseDate = (v) => {
-      // detecta Excel dates (número) o string
-      if (typeof v === "number") {
-        // Excel serial date
-        const d = XLSX.SSF.parse_date_code(v);
-        return new Date(Date.UTC(d.y, d.m - 1, d.d));
-      }
-      const s = norm(v);
-      if (!s) return null;
-      // soporta dd/mm/yyyy, yyyy-mm-dd, etc.
-      const partsSlash = s.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2,4})$/);
-      if (partsSlash) {
-        const dd = +partsSlash[1], mm = +partsSlash[2], yy = +partsSlash[3];
-        const year = yy < 100 ? 2000 + yy : yy;
-        return new Date(year, mm - 1, dd);
-      }
-      const tryD = new Date(s);
-      return isNaN(tryD.getTime()) ? null : tryD;
-    };
+    function parseNumFlexible(v){ if(v==null) return NaN; let s=(""+v).toUpperCase(); s=s.replace(/KM/g,"").replace(/[^\d,.-]/g,""); if(s.indexOf(",")>=0 && s.indexOf(".")<0) s=s.replace(/,/g,"."); s=s.replace(/\s+/g,"").replace(/(?<=\d)\.(?=\d{3}\b)/g,""); const n=parseFloat(s); return isNaN(n)?NaN:n; }
+    function parseDate(v){ if(!v) return null; const s=(""+v).trim(); const t=s.split(" ")[0]; const d=new Date(t); return isNaN(d)?null:d; }
+    function formatNum(n,d=2){ if(n==null||isNaN(n)) return "—"; return n.toLocaleString("es-PE",{maximumFractionDigits:d,minimumFractionDigits:d}); }
+    function sum(a){ return a.reduce((x,y)=>x+(parseFloat(y)||0),0); } function avg(a){ return a.length?sum(a)/a.length:NaN; }
 
-    function detectColumns(headerRow) {
-      // busca columnas por nombre probable
-      const h = headerRow.map(x => norm(x).toLowerCase());
-      const idx = (kw) => h.findIndex(col => col.includes(kw));
+    let headers=[], rawRows=[], filtered=[], col={}, kmChart, galChart;
+    function detectColumns(h){ const H=h.map(x=>norm(x).toLowerCase()); const f=(...c)=>c.map(k=>H.findIndex(z=>z.includes(k))).find(i=>i>=0);
+      return { fecha:f("fecha"), turno:f("turno"), drv:f("conductor","chofer"), placa:f("unidad movil","unidad","vehiculo","vehículo","móvil","movil"), kmIni:f("km inicial"), kmFin:f("km final"), rec:f("recorrido"), gal:f("galones","combustible") }; }
 
-      const dateIdx = [ "fecha", "f. ", "día", "dia" ]
-        .map(kw => h.findIndex(col => col.includes(kw)))
-        .find(i => i >= 0);
-
-      const driverIdx = ["conductor", "chofer", "piloto"]
-        .map(kw => idx(kw)).find(i => i >= 0);
-
-      const plateIdx = ["placa", "vehiculo", "vehículo", "unidad", "movil", "móvil"]
-        .map(kw => idx(kw)).find(i => i >= 0);
-
-      const kmIdx = ["kilometro", "kilómetro", "kilometraje", "km"]
-        .map(kw => idx(kw)).find(i => i >= 0);
-
-      const galIdx = ["galon", "galón", "galones", "combustible", "gasolina", "diesel", "diésel"]
-        .map(kw => idx(kw)).find(i => i >= 0);
-
-      return {
-        date: dateIdx ?? -1,
-        driver: driverIdx ?? -1,
-        plate: plateIdx ?? -1,
-        km: kmIdx ?? -1,
-        gal: galIdx ?? -1,
-      };
-    }
-
-    function formatNum(n, digits = 2) {
-      if (n === null || n === undefined || isNaN(n)) return "—";
-      return n.toLocaleString("es-PE", { maximumFractionDigits: digits, minimumFractionDigits: digits });
-    }
-
-    function formatInt(n) {
-      if (n === null || n === undefined || isNaN(n)) return "—";
-      return Math.round(n).toLocaleString("es-PE");
-    }
-
-    // === Carga de Excel ===
-    async function loadFromUrl(url = "data.xlsx") {
-      try {
-        const res = await fetch(url);
-        if (!res.ok) throw new Error("No se encontró data.xlsx");
-        const arrayBuf = await res.arrayBuffer();
-        processWorkbook(arrayBuf);
-      } catch (e) {
-        alert("No se pudo cargar 'data.xlsx'. Puedes usar el botón 'Cargar Excel'.");
-        console.warn(e);
-      }
-    }
-
-    function processWorkbook(arrayBuf) {
-      const wb = XLSX.read(arrayBuf, { type: "array" });
-      const ws = wb.Sheets[wb.SheetNames[0]];
-      const json = XLSX.utils.sheet_to_json(ws, { header: 1, raw: true, defval: "" });
-
-      if (!json || json.length === 0) {
-        alert("El archivo está vacío.");
-        return;
-      }
-
-      headers = json[0].map(h => norm(h));
-      colIdx = detectColumns(headers);
-
-      rawRows = json.slice(1).filter(r => r.some(x => norm(x) !== ""));
-      buildDynamicUI();
-      applyFilters(); // primera vez
-    }
-
-    // === UI dinámica ===
-    function buildDynamicUI() {
-      // Conductores
-      const driverSet = new Set();
-      rawRows.forEach(r => {
-        const v = colIdx.driver >= 0 ? norm(r[colIdx.driver]) : "";
-        if (v) driverSet.add(v);
-      });
-      const drivers = Array.from(driverSet).sort((a, b) => a.localeCompare(b, "es"));
-
-      const driversList = document.getElementById("driversList");
-      driversList.innerHTML = drivers.map(d => `
+    function buildUI(){
+      const setDrv=new Set(); rawRows.forEach(r=>{ const v=col.drv>=0?norm(r[col.drv]):""; if(v) setDrv.add(v); });
+      const drivers=[...setDrv].sort((a,b)=>a.localeCompare(b,"es"));
+      const driversList=document.getElementById("driversList");
+      driversList.innerHTML=drivers.map(d=>`
         <label class="flex items-center gap-2 p-2 rounded hover:bg-[rgba(255,255,255,0.03)]">
           <input type="checkbox" class="driverCheck accent-sky-400" data-val="${d.replace(/"/g,'&quot;')}" checked />
           <span>${d}</span>
-        </label>
-      `).join("");
+        </label>`).join("");
 
-      // Vehículos
-      const plateSet = new Set();
-      rawRows.forEach(r => {
-        const v = colIdx.plate >= 0 ? norm(r[colIdx.plate]) : "";
-        if (v) plateSet.add(v);
+      const setPl=new Set(); rawRows.forEach(r=>{ const v=col.placa>=0?displayPlate(r[col.placa]):""; if(v) setPl.add(v); });
+      const plates=[...setPl].sort((a,b)=>a.localeCompare(b,"es"));
+      const vehList=document.getElementById("vehList");
+      vehList.innerHTML=plates.map(p=>{ const t=VEHICLE_TYPES[keyPlate(p)]??"—"; return `
+        <label class="flex items-center gap-2 p-2 rounded hover:bg-[rgba(255,255,255,0.03)]">
+          <input type="checkbox" class="vehCheck accent-sky-400" data-val="${p.replace(/"/g,'&quot;')}" checked />
+          <span class="flex items-center gap-2"><span class="font-medium">${p}</span><span class="badge-type">${t}</span></span>
+        </label>`; }).join("");
+
+      document.querySelectorAll(".driverCheck").forEach(el=>el.addEventListener("change",applyFilters));
+      document.querySelectorAll(".vehCheck").forEach(el=>el.addEventListener("change",applyFilters));
+      document.getElementById("driversAll").onclick=()=>{ document.querySelectorAll(".driverCheck").forEach(el=>el.checked=true); applyFilters(); };
+      document.getElementById("driversNone").onclick=()=>{ document.querySelectorAll(".driverCheck").forEach(el=>el.checked=false); applyFilters(); };
+      document.getElementById("vehAll").onclick=()=>{ document.querySelectorAll(".vehCheck").forEach(el=>el.checked=true); document.getElementById("grpCam").checked=true; document.getElementById("grpMoto").checked=true; applyFilters(); };
+      document.getElementById("vehNone").onclick=()=>{ document.querySelectorAll(".vehCheck").forEach(el=>el.checked=false); document.getElementById("grpCam").checked=false; document.getElementById("grpMoto").checked=false; applyFilters(); };
+
+      document.getElementById("fromDate").addEventListener("change",applyFilters);
+      document.getElementById("toDate").addEventListener("change",applyFilters);
+      document.getElementById("grpCam").addEventListener("change",(e)=>{ const cams=["EUG707","EUG717"]; document.querySelectorAll(".vehCheck").forEach(el=>{ const v=el.getAttribute("data-val"); if(cams.includes(keyPlate(v))) el.checked=e.target.checked; }); applyFilters(); });
+      document.getElementById("grpMoto").addEventListener("change",(e)=>{ const motos=["EX7680","EX7664"]; document.querySelectorAll(".vehCheck").forEach(el=>{ const v=el.getAttribute("data-val"); if(motos.includes(keyPlate(v))) el.checked=e.target.checked; }); applyFilters(); });
+
+      const thead=document.querySelector("#dataTable thead");
+      thead.innerHTML=`<tr>${headers.map(h=>`<th class="text-left">${h}</th>`).join("")}<th class="text-left">Tipo</th></tr>`;
+    }
+
+    function getActiveFilters(){
+      const from=document.getElementById("fromDate").value?new Date(document.getElementById("fromDate").value):null;
+      const to=document.getElementById("toDate").value?new Date(document.getElementById("toDate").value):null;
+      const selectedDrivers=new Set([...document.querySelectorAll(".driverCheck")].filter(el=>el.checked).map(el=>el.getAttribute("data-val")));
+      const selectedVeh=new Set([...document.querySelectorAll(".vehCheck")].filter(el=>el.checked).map(el=>el.getAttribute("data-val")));
+      return {from,to,selectedDrivers,selectedVeh};
+    }
+
+    function applyFilters(){
+      const {from,to,selectedDrivers,selectedVeh}=getActiveFilters();
+      filtered=rawRows.filter(r=>{
+        let okDate=true;
+        if(col.fecha>=0){ const d=parseDate(r[col.fecha]); if(from && d && d<new Date(from.getFullYear(),from.getMonth(),from.getDate())) okDate=false; if(to && d && d>new Date(to.getFullYear(),to.getMonth(),to.getDate(),23,59,59)) okDate=false; }
+        let okDrv=true; if(col.drv>=0 && selectedDrivers.size>0){ const drv=norm(r[col.drv]); okDrv=selectedDrivers.has(drv); }
+        let okVeh=true; if(col.placa>=0 && selectedVeh.size>0){ const plc=displayPlate(r[col.placa]); okVeh=selectedVeh.has(plc); }
+        return okDate && okDrv && okVeh;
       });
-      const plates = Array.from(plateSet).sort((a, b) => a.localeCompare(b, "es"));
+      updateKPIs(); renderTable(); updateCharts();
+    }
 
-      const vehList = document.getElementById("vehList");
-      vehList.innerHTML = plates.map(placa => {
-        const tipo = VEHICLE_TYPES[placa] ?? "—";
-        return `
-          <label class="flex items-center gap-2 p-2 rounded hover:bg-[rgba(255,255,255,0.03)]">
-            <input type="checkbox" class="vehCheck accent-sky-400" data-val="${placa.replace(/"/g,'&quot;')}" checked />
-            <span class="flex items-center gap-2">
-              <span class="font-medium">${placa}</span>
-              <span class="chip">${tipo}</span>
-            </span>
-          </label>
-        `;
+    function updateKPIs(){
+      const galVals=filtered.map(r=>col.gal>=0?parseNumFlexible(r[col.gal]):NaN).filter(v=>!isNaN(v));
+      const kmVals=filtered.map(r=>{
+        if(col.rec>=0){ const v=parseNumFlexible(r[col.rec]); if(!isNaN(v)) return v; }
+        if(col.kmIni>=0 && col.kmFin>=0){ const ini=parseNumFlexible(r[col.kmIni]); const fin=parseNumFlexible(r[col.kmFin]); const d=fin-ini; return isNaN(d)?NaN:d; }
+        return NaN;
+      }).filter(v=>!isNaN(v));
+      document.getElementById("kpiGalTotal").textContent=formatNum(sum(galVals),2);
+      document.getElementById("kpiGalAvg").textContent=formatNum(avg(galVals),2);
+      document.getElementById("kpiKmAvg").textContent=formatNum(avg(kmVals),2);
+      document.getElementById("kpiGalTotalNote").textContent=(filtered.length===rawRows.length)?"Sin filtros":"Según filtros";
+    }
+
+    function renderTable(){
+      const tbody=document.querySelector("#dataTable tbody");
+      const rowsHtml=filtered.map(r=>{
+        const placaDisp=col.placa>=0?displayPlate(r[col.placa]):"";
+        const tipo=VEHICLE_TYPES[keyPlate(placaDisp)]??"—";
+        return `<tr>${headers.map((_,i)=>`<td>${r[i]??""}</td>`).join("")}<td>${tipo}</td></tr>`;
       }).join("");
-
-      // Eventos
-      document.querySelectorAll(".driverCheck").forEach(el => el.addEventListener("change", applyFilters));
-      document.querySelectorAll(".vehCheck").forEach(el => el.addEventListener("change", applyFilters));
-
-      document.getElementById("driversAll").onclick = () => {
-        document.querySelectorAll(".driverCheck").forEach(el => el.checked = true);
-        applyFilters();
-      };
-      document.getElementById("driversNone").onclick = () => {
-        document.querySelectorAll(".driverCheck").forEach(el => el.checked = false);
-        applyFilters();
-      };
-      document.getElementById("vehAll").onclick = () => {
-        document.querySelectorAll(".vehCheck").forEach(el => el.checked = true);
-        document.getElementById("grpCam").checked = true;
-        document.getElementById("grpMoto").checked = true;
-        applyFilters();
-      };
-      document.getElementById("vehNone").onclick = () => {
-        document.querySelectorAll(".vehCheck").forEach(el => el.checked = false);
-        document.getElementById("grpCam").checked = false;
-        document.getElementById("grpMoto").checked = false;
-        applyFilters();
-      };
-
-      document.getElementById("fromDate").addEventListener("change", applyFilters);
-      document.getElementById("toDate").addEventListener("change", applyFilters);
-
-      // Grupos de vehículos (Camionetas / Motocicletas)
-      document.getElementById("grpCam").addEventListener("change", (e) => {
-        const platesCam = ["EUG 707", "EUG 717"];
-        document.querySelectorAll(".vehCheck").forEach(el => {
-          const val = el.getAttribute("data-val");
-          if (platesCam.includes(val)) el.checked = e.target.checked;
-        });
-        applyFilters();
-      });
-      document.getElementById("grpMoto").addEventListener("change", (e) => {
-        const platesMoto = ["EX 7680", "EX 7664"];
-        document.querySelectorAll(".vehCheck").forEach(el => {
-          const val = el.getAttribute("data-val");
-          if (platesMoto.includes(val)) el.checked = e.target.checked;
-        });
-        applyFilters();
-      });
-
-      // Tabla: cabeceras (agrega columna Tipo)
-      const thead = document.querySelector("#dataTable thead");
-      thead.innerHTML = `
-        <tr>
-          ${headers.map(h => `<th class="text-left">${h}</th>`).join("")}
-          <th class="text-left">Tipo</th>
-        </tr>
-      `;
+      tbody.innerHTML=rowsHtml || `<tr><td class="subtle p-4" colspan="${headers.length+1}">Sin datos para los filtros seleccionados.</td></tr>`;
+      document.getElementById("rowCount").textContent=`${filtered.length.toLocaleString("es-PE")} fila(s)`;
     }
 
-    function getActiveFilters() {
-      const from = document.getElementById("fromDate").value ? new Date(document.getElementById("fromDate").value) : null;
-      const to = document.getElementById("toDate").value ? new Date(document.getElementById("toDate").value) : null;
-
-      const selectedDrivers = new Set(
-        Array.from(document.querySelectorAll(".driverCheck"))
-          .filter(el => el.checked)
-          .map(el => el.getAttribute("data-val"))
-      );
-
-      const selectedVeh = new Set(
-        Array.from(document.querySelectorAll(".vehCheck"))
-          .filter(el => el.checked)
-          .map(el => el.getAttribute("data-val"))
-      );
-
-      return { from, to, selectedDrivers, selectedVeh };
+    function groupByPlate(idx){
+      const map=new Map();
+      filtered.forEach(r=>{ const placa=col.placa>=0?displayPlate(r[col.placa]):"(Sin placa)"; const v=parseNumFlexible(r[idx]); if(!isNaN(v)) map.set(placa,(map.get(placa)||0)+v); });
+      return [...map.entries()].sort((a,b)=>b[1]-a[1]);
     }
 
-    function applyFilters() {
-      if (!rawRows.length) return;
-
-      const { from, to, selectedDrivers, selectedVeh } = getActiveFilters();
-
-      filtered = rawRows.filter(r => {
-        // fecha
-        let okDate = true;
-        if (colIdx.date >= 0) {
-          const d = parseDate(r[colIdx.date]);
-          if (from && d && d < new Date(from.getFullYear(), from.getMonth(), from.getDate())) okDate = false;
-          if (to && d && d > new Date(to.getFullYear(), to.getMonth(), to.getDate(), 23, 59, 59)) okDate = false;
-        }
-        // conductor
-        let okDriver = true;
-        if (colIdx.driver >= 0 && selectedDrivers.size > 0) {
-          const drv = norm(r[colIdx.driver]);
-          okDriver = selectedDrivers.has(drv);
-        }
-        // vehículo
-        let okVeh = true;
-        if (colIdx.plate >= 0 && selectedVeh.size > 0) {
-          const plc = norm(r[colIdx.plate]);
-          okVeh = selectedVeh.has(plc);
-        }
-        return okDate && okDriver && okVeh;
-      });
-
-      updateKPIs();
-      renderTable();
-      updateCharts();
+    function ensureChart(id, pairs, label, unit, ref){
+      const ctx=document.getElementById(id).getContext("2d"); if(ref) ref.destroy();
+      const wide=window.matchMedia("(min-width: 1024px)").matches; const indexAxis=wide?'y':'x';
+      const container=document.getElementById(id); if(wide){ const rows=Math.max(6, Math.min(20, pairs.length)); container.style.height=(rows*36+80)+"px"; }
+      return new Chart(ctx,{ type:'bar', data:{ labels:pairs.map(d=>d[0]), datasets:[{label, data:pairs.map(d=>d[1])}] },
+        options:{ responsive:true, maintainAspectRatio:false, indexAxis,
+          plugins:{ legend:{display:true, labels:{color:'#cfd9f7'}}, tooltip:{ callbacks:{ label:(c)=>`${c.dataset.label}: ${formatNum(c.parsed.y ?? c.parsed.x)} ${unit}` } } },
+          scales:{ x:{ ticks:{ color:'#cfd9f7', autoSkip:true, maxRotation:wide?0:45 }, grid:{ color:'rgba(255,255,255,0.06)' } },
+                   y:{ ticks:{ color:'#cfd9f7', autoSkip:false }, grid:{ color:'rgba(255,255,255,0.06)' } } } } });
     }
 
-    function sum(arr) { return arr.reduce((a, b) => a + (parseFloat(b) || 0), 0); }
-    function avg(arr) { return arr.length ? sum(arr) / arr.length : NaN; }
-
-    function updateKPIs() {
-      const galVals = filtered.map(r => colIdx.gal >= 0 ? parseNum(r[colIdx.gal]) : NaN).filter(v => !isNaN(v));
-      const kmVals  = filtered.map(r => colIdx.km  >= 0 ? parseNum(r[colIdx.km])  : NaN).filter(v => !isNaN(v));
-
-      document.getElementById("kpiGalTotal").textContent = formatNum(sum(galVals), 2);
-      document.getElementById("kpiGalAvg").textContent   = formatNum(avg(galVals), 2);
-      document.getElementById("kpiKmAvg").textContent    = formatNum(avg(kmVals), 2);
-
-      const note = filtered.length === rawRows.length ? "Sin filtros" : "Según filtros";
-      document.getElementById("kpiGalTotalNote").textContent = note;
-    }
-
-    function renderTable() {
-      const tbody = document.querySelector("#dataTable tbody");
-      const rowsHtml = filtered.map(r => {
-        const placa = colIdx.plate >= 0 ? norm(r[colIdx.plate]) : "";
-        const tipo = VEHICLE_TYPES[placa] ?? "—";
-        return `
-          <tr>
-            ${headers.map((_, i) => `<td>${r[i] ?? ""}</td>`).join("")}
-            <td>${tipo}</td>
-          </tr>
-        `;
-      }).join("");
-      tbody.innerHTML = rowsHtml || `<tr><td class="subtle p-4" colspan="${headers.length+1}">Sin datos para los filtros seleccionados.</td></tr>`;
-      document.getElementById("rowCount").textContent = `${filtered.length.toLocaleString("es-PE")} fila(s)`;
-    }
-
-    function groupByPlate(valuesIdx) {
-      const map = new Map(); // placa -> suma
-      filtered.forEach(r => {
-        const placa = colIdx.plate >= 0 ? norm(r[colIdx.plate]) : "(Sin placa)";
-        const v = parseNum(r[valuesIdx]);
-        if (!isNaN(v)) {
-          map.set(placa, (map.get(placa) || 0) + v);
-        }
-      });
-      // ordenar por valor desc
-      const sorted = Array.from(map.entries()).sort((a, b) => b[1] - a[1]);
-      // limitar a top 12 para claridad
-      return sorted.slice(0, 12);
-    }
-
-    function ensureChart(ctxId, data, label, unit, prevRef) {
-      const ctx = document.getElementById(ctxId).getContext("2d");
-      if (prevRef) prevRef.destroy();
-      return new Chart(ctx, {
-        type: 'bar',
-        data: {
-          labels: data.map(d => d[0]),
-          datasets: [{
-            label: `${label}`,
-            data: data.map(d => d[1]),
-          }]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: {
-            legend: { display: true, labels: { color: '#cfd9f7' } },
-            tooltip: { callbacks: { label: (ctx) => `${ctx.dataset.label}: ${formatNum(ctx.parsed.y)} ${unit}` } }
-          },
-          scales: {
-            x: { ticks: { color: '#cfd9f7' }, grid: { color: 'rgba(255,255,255,0.06)' } },
-            y: { ticks: { color: '#cfd9f7' }, grid: { color: 'rgba(255,255,255,0.06)' } }
-          }
-        }
-      });
-    }
-
-    function updateCharts() {
-      // KM por placa
-      if (colIdx.km >= 0 && colIdx.plate >= 0) {
-        const dataKm = groupByPlate(colIdx.km);
-        kmChart = ensureChart("kmChart", dataKm, "Kilómetros", "km", kmChart);
+    function updateCharts(){
+      let dataKm=[];
+      if(col.rec>=0){ dataKm=groupByPlate(col.rec); }
+      else if(col.kmIni>=0 && col.kmFin>=0){
+        const map=new Map();
+        filtered.forEach(r=>{ const placa=col.placa>=0?displayPlate(r[col.placa]):"(Sin placa)"; const ini=parseNumFlexible(r[col.kmIni]); const fin=parseNumFlexible(r[col.kmFin]); const d=fin-ini; if(!isNaN(d)) map.set(placa,(map.get(placa)||0)+d); });
+        dataKm=[...map.entries()].sort((a,b)=>b[1]-a[1]);
       }
-      // Galones por placa
-      if (colIdx.gal >= 0 && colIdx.plate >= 0) {
-        const dataGal = groupByPlate(colIdx.gal);
-        galChart = ensureChart("galChart", dataGal, "Galones", "gal", galChart);
-      }
+      kmChart=ensureChart("kmChart", dataKm, "Kilómetros", "km", kmChart);
+      if(col.gal>=0){ const dataGal=groupByPlate(col.gal); galChart=ensureChart("galChart", dataGal, "Galones", "gal", galChart); }
     }
 
-    // === Exportar CSV (filtrado) ===
-    function exportCSV() {
-      // añade columna Tipo
-      const out = [ [...headers, "Tipo"] ];
-      filtered.forEach(r => {
-        const placa = colIdx.plate >= 0 ? norm(r[colIdx.plate]) : "";
-        const tipo = VEHICLE_TYPES[placa] ?? "";
-        out.push([ ...headers.map((_, i) => r[i] ?? ""), tipo ]);
-      });
-      const ws = XLSX.utils.aoa_to_sheet(out);
-      const wb = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(wb, ws, "Datos");
-      XLSX.writeFile(wb, "datos_filtrados.csv", { bookType: "csv" });
-    }
-
-    // === Eventos de UI general ===
-    document.getElementById("fileInput").addEventListener("change", (ev) => {
-      const file = ev.target.files?.[0];
-      if (!file) return;
-      const reader = new FileReader();
-      reader.onload = (e) => processWorkbook(e.target.result);
-      reader.readAsArrayBuffer(file);
+    window.addEventListener("DOMContentLoaded", ()=>{
+      try{
+        const aoa=JSON.parse(document.getElementById("embedded-data").textContent);
+        headers=aoa[0].map(x=>(x??"").toString()); rawRows=aoa.slice(1);
+        const idxFecha=headers.findIndex(h=>h.toLowerCase().includes("fecha")); if(idxFecha>=0){ rawRows.forEach(r=>{ if(r[idxFecha]) r[idxFecha]=(""+r[idxFecha]).split(" ")[0]; }); }
+        col=detectColumns(headers); buildUI(); applyFilters();
+        document.getElementById("exportBtn").addEventListener("click", ()=>{
+          const out=[ [...headers,"Tipo"] ];
+          filtered.forEach(r=>{ const placa=col.placa>=0?displayPlate(r[col.placa]):""; const tipo=VEHICLE_TYPES[keyPlate(placa)]??""; out.push([ ...headers.map((_,i)=>r[i]??""), tipo ]); });
+          const csv=out.map(row=>row.map(v=>`"${(v??"").toString().replace(/"/g,'""')}"`).join(",")).join("\n");
+          const blob=new Blob([csv],{type:"text/csv;charset=utf-8;"}); const url=URL.createObjectURL(blob); const a=document.createElement("a"); a.href=url; a.download="datos_filtrados.csv"; a.click(); URL.revokeObjectURL(url);
+        });
+        document.getElementById("resetBtn").addEventListener("click", ()=>{
+          document.getElementById("fromDate").value=""; document.getElementById("toDate").value="";
+          document.querySelectorAll(".driverCheck,.vehCheck").forEach(el=>el.checked=true);
+          const grpCam=document.getElementById("grpCam"); const grpMoto=document.getElementById("grpMoto");
+          if(grpCam) grpCam.checked=true; if(grpMoto) grpMoto.checked=true; applyFilters();
+        });
+        window.addEventListener("resize", ()=>updateCharts());
+      }catch(e){ console.error(e); alert("Error cargando datos integrados."); }
     });
-    document.getElementById("reloadBtn").addEventListener("click", () => loadFromUrl("data.xlsx"));
-    document.getElementById("resetBtn").addEventListener("click", () => {
-      // reset fecha
-      document.getElementById("fromDate").value = "";
-      document.getElementById("toDate").value = "";
-      // reset checks
-      document.querySelectorAll(".driverCheck,.vehCheck").forEach(el => el.checked = true);
-      const grpCam = document.getElementById("grpCam");
-      const grpMoto = document.getElementById("grpMoto");
-      if (grpCam) grpCam.checked = true;
-      if (grpMoto) grpMoto.checked = true;
-      applyFilters();
-    });
-    document.getElementById("exportBtn").addEventListener("click", exportCSV);
-
-    // === Inicio: intentar cargar data.xlsx automáticamente ===
-    window.addEventListener("DOMContentLoaded", () => loadFromUrl("data.xlsx"));
   </script>
 </body>
 </html>
+
