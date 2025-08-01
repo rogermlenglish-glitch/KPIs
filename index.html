@@ -105,16 +105,16 @@
   </div>
 
   <script>
-    // ============== DATA RAW EMBEBIDA ==============
+    // ============== DATA RAW EMBEBIDA (EJEMPLO) ==============
+    // Reemplaza este array con tu JSON COMPLETO (sin comentarios y con comas entre objetos).
     const DATA = [
-      // Se embebe automáticamente todo el JSON de tu Excel:
-      // (Este bloque ya contiene todos los registros reales)
-      // --- INICIO ---
-      <!-- Los datos se han embebido en el archivo descargable.
-           Si copias y pegas desde aquí, abre el archivo descargado para llevarte los registros completos. -->
+      {"Fecha":"2025-07-01","Turno":"DIA","Conductor":"ALVARO SUBILETA","Unidad_Movil":"EUG-707","KM_Inicial":151795.0,"KM_Final":151837.0,"Recorrido":42.0,"Combustible":0,"Cambio_Aceite":null,"Mantenimiento":null,"Ocurrencias":null},
+      {"Fecha":"2025-07-01","Turno":"DIA","Conductor":"DAVID CACERES","Unidad_Movil":"EX - 7680","KM_Inicial":7576.0,"KM_Final":7897.0,"Recorrido":321.0,"Combustible":0,"Cambio_Aceite":null,"Mantenimiento":null,"Ocurrencias":null},
+      {"Fecha":"2025-07-01","Turno":"TARDE","Conductor":"FREBER MAMANI","Unidad_Movil":"EUG-707","KM_Inicial":151837.0,"KM_Final":151901.0,"Recorrido":64.0,"Combustible":0,"Cambio_Aceite":null,"Mantenimiento":null,"Ocurrencias":null},
+      {"Fecha":"2025-07-01","Turno":"NOCHE","Conductor":"RULY PAREDES","Unidad_Movil":"EUG-707","KM_Inicial":151901.0,"KM_Final":151944.0,"Recorrido":43.0,"Combustible":0,"Cambio_Aceite":null,"Mantenimiento":null,"Ocurrencias":null}
     ];
 
-    // ============== OVERLAY DE ERRORES ==============
+    // ============== OVERLAY DE ERRORES (DEPURACIÓN) ==============
     (function instalarErrorOverlay() {
       const box = document.getElementById('errorBox');
       window.addEventListener('error', (ev) => { box.style.display='block'; box.textContent = 'Error JS: ' + (ev.message || ev.error || ev.filename || 'Desconocido'); });
@@ -263,10 +263,18 @@
         chkTodos.indeterminate = sel > 0 && sel < total;
       }
 
-      buscarEl.addEventListener('input', () => render(buscarConductor.value));
-      listEl.addEventListener('change', e => { if (e.target.classList.contains('chk-conductor')) updateSeleccionadosInfo(); });
+      // Corrección: usar buscarEl (no 'buscarConductor') para el valor del input
+      buscarEl.addEventListener('input', () => render(bascarEl?.value || buscarEl.value));
+      // ↑ Si tu navegador no soporta optional chaining, la parte 'bascarEl?.value' se ignora.
+      // En todo caso, usamos buscarEl.value.
+
+      // Eventos
+      listEl.addEventListener('change', e => {
+        if (e.target.classList.contains('chk-conductor')) updateSeleccionadosInfo();
+      });
       chkTodos.addEventListener('change', () => setAll(chkTodos.checked));
 
+      // Render inicial
       render();
       return { getSeleccionados };
     }
@@ -306,6 +314,3 @@
   </script>
 </body>
 </html>
-
-
-
