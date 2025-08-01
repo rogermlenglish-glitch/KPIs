@@ -13,9 +13,9 @@
     p.hint { margin: 0 0 24px; color: #555; }
     .filters {
       display: grid;
-      grid-template-columns: repeat(6, minmax(100px, 1fr));
+      grid-template-columns: repeat(6, minmax(120px, 1fr));
       gap: var(--gap);
-      align-items: end;
+      align-items: start;
       margin-bottom: 24px;
     }
     .filters label { display: block; font-size: 12px; color: #444; margin-bottom: 6px; }
@@ -25,6 +25,16 @@
     .filters button {
       padding: 10px 14px; border: none; border-radius: 10px; cursor: pointer; background: #1f7aec; color: #fff;
     }
+    .conductores-box {
+      grid-column: 1 / -1;
+      background: #fff; border-radius: 12px; padding: 12px; border: 1px solid #e5e5e5;
+      max-height: 260px; overflow: auto;
+    }
+    .conductores-actions { display: flex; gap: 12px; align-items: center; margin-bottom: 8px; }
+    .conductores-grid {
+      display: grid; gap: 8px; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    }
+    .conductor-item { font-size: 14px; }
     .grid {
       display: grid;
       grid-template-columns: 1fr;
@@ -41,7 +51,7 @@
 <body>
   <div class="container">
     <h1>KPIs Movilidad Serenazgo - Julio 2025</h1>
-    <p class="hint">Filtra por fecha y conductor. Los KPIs se recalculan en tiempo real.</p>
+    <p class="hint">Filtra por fecha y marca los conductores que quieras analizar. Los KPIs se recalculan en tiempo real.</p>
 
     <div class="filters">
       <div>
@@ -53,11 +63,21 @@
         <input type="date" id="endDate" />
       </div>
       <div style="grid-column: span 3;">
-        <label for="conductorFilter">Conductor (contiene)</label>
-        <input type="text" id="conductorFilter" placeholder="Ej.: FREBER, RULY, DAVID..." />
+        <label for="buscarConductor">Buscar conductor (opcional)</label>
+        <input type="text" id="buscarConductor" placeholder="Ej.: FREBER, RULY, DAVID..." />
       </div>
       <div>
-        <button id="btnFiltrar" type="button">Filtrar</button>
+        <label>&nbsp;</label>
+        <button id="btnFiltrar" type="button" title="Aplicar filtros">Filtrar</button>
+      </div>
+
+      <!-- Lista de conductores con checkboxes -->
+      <div class="conductores-box">
+        <div class="conductores-actions">
+          <label><input type="checkbox" id="chkTodos" checked /> Seleccionar todos</label>
+          <span id="seleccionadosInfo" class="muted"></span>
+        </div>
+        <div id="conductoresList" class="conductores-grid"></div>
       </div>
     </div>
 
@@ -70,10 +90,10 @@
   </div>
 
   <script>
-    // ===========================
+    // ======================================================
     // 1) DATA (EJEMPLO)
     // Reemplaza el contenido de DATA con TODO tu JSON (sin comentarios).
-    // ===========================
+    // ======================================================
     const DATA = [
       {"Fecha":"2025-07-01","Turno":"DIA","Conductor":"ALVARO SUBILETA","Unidad_Movil":"EUG-707","KM_Inicial":151795.0,"KM_Final":151837.0,"Recorrido":42.0,"Combustible":null,"Cambio_Aceite":null,"Mantenimiento":null,"Ocurrencias":null},
       {"Fecha":"2025-07-01","Turno":"DIA","Conductor":"DAVID CACERES","Unidad_Movil":"EX - 7680","KM_Inicial":7576.0,"KM_Final":7897.0,"Recorrido":321.0,"Combustible":null,"Cambio_Aceite":null,"Mantenimiento":null,"Ocurrencias":null},
@@ -82,9 +102,9 @@
       // Pega aquí el RESTO DE REGISTROS (sin comentarios y separados por comas).
     ];
 
-    // ===========================
+    // ======================================================
     // 2) HELPERS
-    // ===========================
+    // ======================================================
     const TURNOS = ["DIA", "TARDE", "NOCHE"];
 
     function toNumber(v) {
@@ -93,7 +113,6 @@
     }
 
     function parseDateISO(s) {
-      // Asume formato "YYYY-MM-DD"
       const d = new Date(s);
       return isNaN(d.getTime()) ? null : d;
     }
@@ -110,25 +129,12 @@
       return {min, max};
     }
 
-    function filtrarDatos(rows, startDate, endDate, conductor) {
-      const sd = startDate ? parseDateISO(startDate) : null;
-      const ed = endDate   ? parseDateISO(endDate)   : null;
-      const cond = (conductor || "").trim().toLowerCase();
-
-      return rows.filter(item => {
-        const f = parseDateISO(item.Fecha);
-        const byDate = (!sd || (f && f >= sd)) && (!ed || (f && f <= ed));
-        const byCond = !cond || String(item.Conductor || "").toLowerCase().includes(cond);
-        return byDate && byCond;
-      });
-    }
-
     function calcularKPIs(rows) {
       // KPI 1: Suma de combustible por turno
       const combustiblePorTurno = TURNOS.map(turno => {
         return rows
           .filter(r => r.Turno === turno)
-          .reduce((acc, r) => acc + (toNumber(r.Combustible) ?? 0), 0);
+          .reduce((acc, r) => acc + toNumber(r.Combustible), 0);
       });
 
       // KPI 2: Kilometraje promedio por turno
@@ -149,9 +155,22 @@
       return { combustiblePorTurno, kmPromedioPorTurno, recorridoTotalPorTurno };
     }
 
-    // ===========================
+    function filtrarDatos(rows, startDate, endDate, conductoresSeleccionados) {
+      const sd = startDate ? parseDateISO(startDate) : null;
+      const ed = endDate   ? parseDateISO(endDate)   : null;
+      const setConductores = new Set(conductoresSeleccionados);
+
+      return rows.filter(item => {
+        const f = parseDateISO(item.Fecha);
+        const byDate = (!sd || (f && f >= sd)) && (!ed || (f && f <= ed));
+        const byCond = !setConductores.size || setConductores.has(String(item.Conductor || ""));
+        return byDate && byCond;
+      });
+    }
+
+    // ======================================================
     // 3) CHARTS
-    // ===========================
+    // ======================================================
     let combustibleChart, kmPromedioChart, recorridoTotalChart;
 
     function initCharts(kpis) {
@@ -205,20 +224,88 @@
       recorridoTotalChart.update();
     }
 
-    // ===========================
-    // 4) UI WIRING
-    // ===========================
+    // ======================================================
+    // 4) UI: Checkboxes de conductores
+    // ======================================================
+    function buildConductoresCheckboxes(rows) {
+      const listEl = document.getElementById('conductoresList');
+      const buscarEl = document.getElementById('buscarConductor');
+      const chkTodos = document.getElementById('chkTodos');
+      const infoEl = document.getElementById('seleccionadosInfo');
+
+      function getAllConductores() {
+        const set = new Set(rows.map(r => String(r.Conductor || "").trim()).filter(Boolean));
+        return Array.from(set).sort((a,b) => a.localeCompare(b, 'es', {sensitivity: 'base'}));
+      }
+
+      function render(filterText = "") {
+        const conductores = getAllConductores().filter(n =>
+          n.toLowerCase().includes(filterText.toLowerCase())
+        );
+        listEl.innerHTML = "";
+        conductores.forEach(nombre => {
+          const id = "cond_" + nombre.replace(/[^a-z0-9]+/gi, "_");
+          const wrapper = document.createElement('label');
+          wrapper.className = "conductor-item";
+          wrapper.innerHTML = `
+            <input type="checkbox" class="chk-conductor" id="${id}" data-nombre="${nombre}" checked />
+            ${nombre}
+          `;
+          listEl.appendChild(wrapper);
+        });
+        updateSeleccionadosInfo();
+      }
+
+      function getSeleccionados() {
+        const checks = listEl.querySelectorAll('.chk-conductor');
+        const sel = [];
+        checks.forEach(chk => { if (chk.checked) sel.push(chk.getAttribute('data-nombre')); });
+        return sel;
+      }
+
+      function setAll(checked) {
+        const checks = listEl.querySelectorAll('.chk-conductor');
+        checks.forEach(chk => { chk.checked = checked; });
+        updateSeleccionadosInfo();
+      }
+
+      function updateSeleccionadosInfo() {
+        const total = listEl.querySelectorAll('.chk-conductor').length;
+        const sel = getSeleccionados().length;
+        infoEl.textContent = `Seleccionados: ${sel} / ${total}`;
+        chkTodos.checked = sel === total && total > 0;
+        chkTodos.indeterminate = sel > 0 && sel < total;
+      }
+
+      // Eventos
+      buscarEl.addEventListener('input', () => render(buscarEl.value));
+      listEl.addEventListener('change', e => {
+        if (e.target.classList.contains('chk-conductor')) updateSeleccionadosInfo();
+      });
+      chkTodos.addEventListener('change', () => setAll(chkTodos.checked));
+
+      // Render inicial
+      render();
+
+      return { getSeleccionados };
+    }
+
+    // ======================================================
+    // 5) WIRING: Fechas + Conductores + Charts
+    // ======================================================
     document.addEventListener('DOMContentLoaded', () => {
       const startEl = document.getElementById('startDate');
       const endEl   = document.getElementById('endDate');
-      const condEl  = document.getElementById('conductorFilter');
       const btn     = document.getElementById('btnFiltrar');
       const resume  = document.getElementById('resume');
 
-      // Setear rangos de fechas a partir del dataset
+      // Rango de fechas por dataset
       const {min, max} = getMinMaxDate(DATA);
       if (min) startEl.value = formatISO(min);
       if (max) endEl.value   = formatISO(max);
+
+      // Construir lista de conductores con checkboxes
+      const conductoresUI = buildConductoresCheckboxes(DATA);
 
       // Inicializar gráficos
       const kpisInit = calcularKPIs(DATA);
@@ -226,19 +313,24 @@
       resume.textContent = `Mostrando ${DATA.length} registros.`;
 
       function aplicarFiltros() {
-        const filtered = filtrarDatos(DATA, startEl.value, endEl.value, condEl.value);
+        const seleccion = conductoresUI.getSeleccionados();
+        const filtered = filtrarDatos(DATA, startEl.value, endEl.value, seleccion);
         const kpis = calcularKPIs(filtered);
         updateCharts(kpis);
         resume.textContent = `Mostrando ${filtered.length} de ${DATA.length} registros.`;
       }
 
-      // Botón y eventos extra
       btn.addEventListener('click', aplicarFiltros);
       startEl.addEventListener('change', aplicarFiltros);
       endEl.addEventListener('change', aplicarFiltros);
-      condEl.addEventListener('keyup', (e) => { if (e.key === 'Enter') aplicarFiltros(); });
+      // También recalcula al cambiar la selección de conductores
+      document.getElementById('conductoresList')
+        .addEventListener('change', aplicarFiltros);
+      document.getElementById('chkTodos')
+        .addEventListener('change', aplicarFiltros);
     });
   </script>
 </body>
 </html>
+
 
